@@ -3,11 +3,12 @@
 import Image from "next/image";
 import { Eye, Pencil, Trash2, IndianRupee, Plus, Search } from "lucide-react";
 
-import type { Student } from "../../students/types/student";
+import type { Student } from "../types/student";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 interface StudentTableProps {
   students: Student[];
@@ -146,13 +147,11 @@ export default function StudentTable({
 
                   <td className="px-6 py-4">
                     <div className="flex justify-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => onView?.(student)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <Link href={`/features/students/${student.id}`}>
+                        <Button size="icon" variant="outline">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
 
                       <Button
                         size="icon"
