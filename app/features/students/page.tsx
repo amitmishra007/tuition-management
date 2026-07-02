@@ -18,24 +18,7 @@ export default async function StudentsPage() {
 
   return (
     <div className="space-y-6">
-      <StudentTable
-        students={students}
-        onAddStudent={() => {
-          console.log("Add Student");
-        }}
-        onView={(student) => {
-          console.log("View", student);
-        }}
-        onEdit={(student) => {
-          console.log("Edit", student);
-        }}
-        onDelete={(student) => {
-          console.log("Delete", student);
-        }}
-        onRecordFee={(student) => {
-          console.log("Record Fee", student);
-        }}
-      />
+      <StudentTable students={students} />
     </div>
   );
 }
