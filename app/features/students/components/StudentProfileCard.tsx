@@ -3,7 +3,23 @@
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Cake, Clock3, Pencil } from "lucide-react";
+import {
+  BookOpen,
+  Building2,
+  Cake,
+  CalendarCheck2,
+  CalendarClock,
+  Clock3,
+  GraduationCap,
+  IndianRupee,
+  Mailbox,
+  Map,
+  MapPin,
+  NotebookPen,
+  Pencil,
+  School,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 import {
   Phone,
@@ -77,7 +93,7 @@ export default function StudentProfileCard({
             </div>
           </div>
 
-          <Link href={`/students/${student.id}/edit`}>
+          <Link href={`/features/students/${student.id}/edit`}>
             <Button className="mt-4 lg:mt-0 cursor-pointer">
               <Pencil className="mr-2 h-4 w-4" />
               Edit Student
@@ -309,41 +325,37 @@ export default function StudentProfileCard({
         {/* Academic */}
 
         <div className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-md">
-          <h2 className="mb-5 border-b border-indigo-100 pb-3 text-lg font-bold text-indigo-700">
-            Academic Details
-          </h2>
-
-          <div className="grid grid-cols-2 gap-5 text-sm">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <p className="section-label flex items-center gap-2">
+                <BadgeCheck className="h-4 w-4 text-blue-600" />
                 Admission No.
               </p>
-              <p className="font-semibold text-slate-800">
-                {student.admissionNo}
-              </p>
+              <p className="section-value">{student.admissionNo}</p>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <p className="section-label flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-violet-600" />
                 Class
               </p>
-              <p className="font-semibold text-slate-800">
-                {student.studentClass}
-              </p>
+              <p className="section-value">{student.studentClass}</p>
             </div>
 
-            <div className="col-span-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="sm:col-span-2 xl:col-span-2">
+              <p className="section-label flex items-center gap-2">
+                <School className="h-4 w-4 text-emerald-600" />
                 School
               </p>
-              <p className="font-semibold text-slate-800">{student.school}</p>
+              <p className="section-value">{student.school}</p>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="sm:col-span-2 xl:col-span-4">
+              <p className="section-label flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-orange-500" />
                 Batch
               </p>
-              <p className="font-semibold text-slate-800">{student.batch}</p>
+              <p className="section-value">{student.batch}</p>
             </div>
           </div>
         </div>
@@ -351,24 +363,33 @@ export default function StudentProfileCard({
         {/* Fee */}
 
         <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-md">
-          <h2 className="mb-5 border-b border-emerald-100 pb-3 text-lg font-bold text-emerald-700">
+          <h2 className="mb-5 flex items-center gap-2 border-b border-emerald-100 pb-3 text-lg font-bold text-emerald-700">
+            <Wallet className="h-5 w-5" />
             Fee Details
           </h2>
 
-          <div className="grid grid-cols-2 gap-5 text-sm">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Monthly Fee */}
+
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <IndianRupee className="h-4 w-4 text-emerald-600" />
                 Monthly Fee
               </p>
-              <p className="text-2xl font-bold text-emerald-600">
+
+              <p className="text-3xl font-bold text-emerald-600">
                 ₹ {student.monthlyFee.toLocaleString("en-IN")}
               </p>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {/* Fee Status */}
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Wallet className="h-4 w-4 text-blue-600" />
                 Fee Status
               </p>
+
               <Badge
                 className={
                   student.feeStatus === "Paid"
@@ -380,20 +401,28 @@ export default function StudentProfileCard({
               </Badge>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {/* Last Paid */}
+
+            <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <CalendarCheck2 className="h-4 w-4 text-blue-600" />
                 Last Fee Paid
               </p>
+
               <p className="font-semibold text-slate-800">
                 {formatDate(student.lastFeePaid)}
               </p>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Next Due
+            {/* Next Due */}
+
+            <div className="rounded-xl border border-red-100 bg-red-50/60 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <CalendarClock className="h-4 w-4 text-red-500" />
+                Next Due Date
               </p>
-              <p className="font-semibold text-red-400">
+
+              <p className="font-semibold text-red-600">
                 {formatDate(student.nextDueDate)}
               </p>
             </div>
@@ -403,36 +432,53 @@ export default function StudentProfileCard({
         {/* Address */}
 
         <div className="rounded-2xl border border-orange-100 bg-white p-6 shadow-md lg:col-span-2">
-          <h2 className="mb-5 border-b border-orange-100 pb-3 text-lg font-bold text-orange-700">
+          <h2 className="mb-5 flex items-center gap-2 border-b border-orange-100 pb-3 text-lg font-bold text-orange-700">
+            <MapPin className="h-5 w-5" />
             Address
           </h2>
 
-          <div className="grid gap-5 md:grid-cols-4 text-sm">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {/* Address */}
+
+            <div className="rounded-xl border border-orange-100 bg-orange-50/60 p-4 sm:col-span-2 xl:col-span-2">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <MapPin className="h-4 w-4 text-orange-600" />
                 Address
               </p>
+
               <p className="font-semibold text-slate-800">{student.address}</p>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {/* City */}
+
+            <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Building2 className="h-4 w-4 text-blue-600" />
                 City
               </p>
+
               <p className="font-semibold text-slate-800">{student.city}</p>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {/* State */}
+
+            <div className="rounded-xl border border-purple-100 bg-purple-50/60 p-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Map className="h-4 w-4 text-purple-600" />
                 State
               </p>
+
               <p className="font-semibold text-slate-800">{student.state}</p>
             </div>
 
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {/* Pincode */}
+
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 sm:col-span-2 xl:col-span-4">
+              <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Mailbox className="h-4 w-4 text-emerald-600" />
                 Pincode
               </p>
+
               <p className="font-semibold text-slate-800">{student.pincode}</p>
             </div>
           </div>
@@ -441,13 +487,27 @@ export default function StudentProfileCard({
         {/* Remarks */}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md lg:col-span-2">
-          <h2 className="mb-5 border-b border-slate-200 pb-3 text-lg font-bold text-slate-700">
+          <h2 className="mb-5 flex items-center gap-2 border-b border-slate-200 pb-3 text-lg font-bold text-slate-700">
+            <NotebookPen className="h-5 w-5 text-slate-600" />
             Remarks
           </h2>
 
-          <p className="leading-7 text-slate-600">
-            {student.remarks || "No remarks added."}
-          </p>
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5">
+            <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <NotebookPen className="h-4 w-4" />
+              Notes
+            </p>
+
+            <p className="leading-7 text-slate-700">
+              {student.remarks ? (
+                student.remarks
+              ) : (
+                <span className="italic text-slate-400">
+                  No remarks have been added for this student.
+                </span>
+              )}
+            </p>
+          </div>
         </div>
       </div>
     </>

@@ -1,13 +1,20 @@
-"use client";
-
-import { useState } from "react";
-
 import StudentTable from "../students/components/StudentTable";
-import { dummyStudents } from "../students/data/dummyStudents";
 import type { Student } from "../students/types/student";
 
-export default function StudentsPage() {
-  const [students] = useState<Student[]>(dummyStudents);
+import { supabaseServer } from "@/lib/supabase/server";
+import { mapStudent } from "../students/lib/mapStudent";
+
+export default async function StudentsPage() {
+  const { data, error } = await supabaseServer
+    .from("students")
+    .select("*")
+    .order("firstname", { ascending: true });
+
+  if (error) {
+    console.error("Failed to fetch students:", error);
+  }
+
+  const students: Student[] = (data ?? []).map(mapStudent);
 
   return (
     <div className="space-y-6">
