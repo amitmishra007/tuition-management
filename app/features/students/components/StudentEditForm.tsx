@@ -55,7 +55,7 @@ interface Props {
 export default function StudentEditForm({ student }: Props) {
   const [profileUrl, setProfileUrl] = useState(student.profilePhoto);
   const [uploading, setUploading] = useState(false);
-  const { register, handleSubmit, control, watch } = useForm<Student>({
+  const { register, handleSubmit, control } = useForm<Student>({
     defaultValues: student,
   });
 
@@ -80,7 +80,7 @@ export default function StudentEditForm({ student }: Props) {
     setLoading(true);
 
     try {
-      const { id, ...updateData } = values;
+      const { ...updateData } = values;
 
       const finalData = {
         ...updateData,
@@ -167,14 +167,13 @@ export default function StudentEditForm({ student }: Props) {
           <div className="flex flex-col items-center gap-3">
             <div
               {...getRootProps()}
-              className={`group relative cursor-pointer overflow-hidden rounded-full border-4 transition-all
-
-      ${
-        isDragActive
-          ? "border-primary ring-4 ring-primary/20"
-          : "border-slate-200 hover:border-primary"
-      }
-    `}
+              className={`group relative cursor-pointer overflow-hidden rounded-full border-4 transition-all ${
+                uploading
+                  ? "pointer-events-none opacity-70"
+                  : isDragActive
+                    ? "border-primary ring-4 ring-primary/20"
+                    : "border-slate-200 hover:border-primary"
+              }`}
             >
               <input {...getInputProps()} />
 

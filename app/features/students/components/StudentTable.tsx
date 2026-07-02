@@ -34,7 +34,6 @@ interface StudentTableProps {
 export default function StudentTable({
   students,
   onAddStudent,
-  onView,
   onEdit,
   onDelete,
   onRecordFee,

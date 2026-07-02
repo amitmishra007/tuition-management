@@ -45,7 +45,7 @@ export default function StudentProfileCard({
 }: StudentProfileCardProps) {
   return (
     <>
-      <div className="mb-8 rounded-3xl border border-slate-200 bg-gradient-to-r from-sky-50 via-white to-indigo-50 p-6 shadow-lg">
+      <div className="mb-8 rounded-3xl border border-slate-200 bg-linear-to-r from-sky-50 via-white to-indigo-50 p-6 shadow-lg">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col items-center gap-6 sm:flex-row">
             <Image
