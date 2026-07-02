@@ -128,3 +128,142 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  /* ===============================
+     Dashboard Design System
+  =============================== */
+
+  .dashboard-page {
+    @apply min-h-screen bg-slate-50;
+  }
+
+  .dashboard-section {
+    @apply mt-8 grid gap-6 lg:grid-cols-2;
+  }
+
+  /* ---------- Cards ---------- */
+
+  .dashboard-card {
+    @apply rounded-2xl
+    border
+    border-slate-200/80
+    bg-gradient-to-br
+    from-white
+    via-slate-50
+    to-blue-50/40
+    p-6
+    shadow-md
+    transition-all
+    duration-300
+    hover:-translate-y-1
+    hover:border-blue-200
+    hover:shadow-xl;
+  }
+
+  .dashboard-card-title {
+    @apply mb-5
+    border-b
+    border-slate-200
+    pb-3
+    text-lg
+    font-bold
+    tracking-tight
+    text-slate-800;
+  }
+
+  /* ---------- Grids ---------- */
+
+  .dashboard-grid {
+    @apply grid grid-cols-2 gap-5 text-sm;
+  }
+
+  .dashboard-grid-wide {
+    @apply grid gap-5 text-sm md:grid-cols-4;
+  }
+
+  /* ---------- Labels ---------- */
+
+  .dashboard-label {
+    @apply text-xs
+    font-semibold
+    uppercase
+    tracking-wider
+    text-slate-500;
+  }
+
+  .dashboard-value {
+    @apply mt-1
+    text-[15px]
+    font-semibold
+    text-slate-800;
+  }
+
+  .dashboard-highlight {
+    @apply mt-1
+    text-2xl
+    font-bold
+    text-emerald-600;
+  }
+
+  /* ---------- Header ---------- */
+
+  .dashboard-header {
+    @apply mb-8
+    flex
+    flex-col
+    gap-6
+    md:flex-row
+    md:items-center
+    md:justify-between;
+  }
+
+  /* ---------- Buttons ---------- */
+
+  .dashboard-primary-btn {
+    @apply rounded-xl
+    shadow-md
+    transition-all
+    duration-300
+    hover:-translate-y-0.5
+    hover:shadow-lg;
+  }
+
+  /* ---------- Tables ---------- */
+
+  .dashboard-table {
+    @apply overflow-hidden rounded-2xl border bg-white shadow-sm;
+  }
+
+  .dashboard-table-header {
+    @apply bg-slate-100 font-semibold text-slate-700;
+  }
+
+  .dashboard-table-row {
+    @apply transition-colors hover:bg-slate-50;
+  }
+
+  /* ---------- Search ---------- */
+
+  .dashboard-search {
+    @apply rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500;
+  }
+
+  /* ---------- Status ---------- */
+
+  .status-active {
+    @apply border border-emerald-200 bg-emerald-100 text-emerald-700;
+  }
+
+  .status-inactive {
+    @apply border border-red-200 bg-red-100 text-red-700;
+  }
+
+  .status-paid {
+    @apply border border-green-200 bg-green-100 text-green-700;
+  }
+
+  .status-pending {
+    @apply border border-amber-200 bg-amber-100 text-amber-700;
+  }
+}
