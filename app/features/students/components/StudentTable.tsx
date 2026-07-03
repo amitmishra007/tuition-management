@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -68,6 +68,10 @@ export default function StudentTable({
         .includes(q),
     );
   }, [students, debouncedSearch]);
+  const router = useRouter();
+  const handleEdit = (studentId: string) => {
+    router.push(`/features/students/${studentId}/edit`);
+  };
 
   return (
     <div className="space-y-6">
@@ -187,7 +191,7 @@ export default function StudentTable({
                   variant="outline"
                   size="icon"
                   className="w-full"
-                  onClick={() => onEdit?.(student)}
+                  onClick={() => handleEdit(student.id)}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>

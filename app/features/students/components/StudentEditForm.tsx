@@ -47,6 +47,7 @@ import {
 
 import { updateStudent } from "../action";
 import { uploadToCloudinary } from "../lib/uploadToCloudinary";
+import BackButton from "./BackButton";
 
 interface Props {
   student: Student;
@@ -135,10 +136,11 @@ export default function StudentEditForm({ student }: Props) {
       {/* Header */}
       <div className="flex flex-col gap-5 rounded-3xl border bg-white p-6 shadow-md lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-2">
-          <Link href={`/students/${student.id}`}>
-            <Button variant="outline" size="sm">
+          <BackButton />
+          <Link href="/">
+            <Button variant="default" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              Home
             </Button>
           </Link>
 
@@ -182,7 +184,7 @@ export default function StudentEditForm({ student }: Props) {
                 alt={firstName}
                 width={130}
                 height={130}
-                className="h-[130px] w-[130px] object-cover transition duration-300 group-hover:scale-105"
+                className="h-32.5 w-32.5 object-cover transition duration-300 group-hover:scale-105"
               />
 
               <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
@@ -638,9 +640,9 @@ export default function StudentEditForm({ student }: Props) {
           </Button>
         </Link>
 
-        <Button type="submit" size="lg">
+        <Button type="submit" size="lg" disabled={loading}>
           <Save className="mr-2 h-4 w-4" />
-          Save Changes
+          {loading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </form>

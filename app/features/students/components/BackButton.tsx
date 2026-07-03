@@ -19,7 +19,7 @@ export default function BackButton() {
       }}
     >
       <ArrowLeft className="mr-2 h-4 w-4" />
-      Back to Students
+      Back to Previous
     </Button>
   );
 }
