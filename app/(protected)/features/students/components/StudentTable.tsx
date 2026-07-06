@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-
 import {
   ClipboardCheck,
   Eye,
@@ -16,14 +15,13 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-
 import type { Student } from "../types/student";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { startTransition } from "react";
 
 interface StudentTableProps {
   students: Student[];
@@ -63,7 +61,7 @@ const fullName = (student: Student) => {
 export default function StudentTable({
   students,
   onAddStudent,
-  onEdit,
+  // onEdit,
   onDelete,
   onRecordFee,
   onAttendance,
@@ -74,6 +72,8 @@ export default function StudentTable({
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  const [activeRow, setActiveRow] = useState<string | null>(null);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -81,6 +81,13 @@ export default function StudentTable({
 
     return () => clearTimeout(timer);
   }, [search]);
+
+  useEffect(() => {
+    students.forEach((student) => {
+      router.prefetch(`/features/students/${student.id}`);
+      router.prefetch(`/features/students/${student.id}/edit`);
+    });
+  }, [students, router]);
 
   const filteredStudents = useMemo(() => {
     if (!debouncedSearch.trim()) return students;
@@ -108,7 +115,11 @@ export default function StudentTable({
   }, [students, debouncedSearch]);
 
   const handleEdit = (id: string) => {
-    router.push(`/features/students/${id}/edit`);
+    setActiveRow(id);
+
+    startTransition(() => {
+      router.push(`/features/students/${id}/edit`);
+    });
   };
 
   return (
@@ -159,7 +170,9 @@ export default function StudentTable({
         {filteredStudents.map((student) => (
           <Card
             key={student.id}
-            className="overflow-hidden rounded-3xl transition-all hover:shadow-lg"
+            className={`border-b transition-all duration-200 hover:bg-slate-50 ${
+              activeRow === student.id ? "opacity-40 pointer-events-none" : ""
+            }`}
           >
             <CardContent className="space-y-5 p-5">
               <div className="flex items-center gap-4">
@@ -181,10 +194,7 @@ export default function StudentTable({
                   </p>
 
                   <Badge
-                    className="mt-2"
-                    variant={
-                      student.status === "Active" ? "default" : "destructive"
-                    }
+                    variant={student.status === "Active" ? "success" : "danger"}
                   >
                     {value(student.status)}
                   </Badge>
@@ -206,9 +216,15 @@ export default function StudentTable({
                   <p className="font-medium">{value(student.fatherName)}</p>
                 </div>
 
-                <div>
+                <div className="cursor-pointer">
                   <p className="text-muted-foreground">Phone</p>
-                  <p className="font-medium">{value(student.phone)}</p>
+
+                  <a
+                    href={`tel:+91${String(student.phone).replace(/\D/g, "")}`}
+                    className="font-medium text-sky-700 transition-colors hover:text-sky-900 hover:underline"
+                  >
+                    {value(student.phone)}
+                  </a>
                 </div>
 
                 <div>
@@ -222,15 +238,28 @@ export default function StudentTable({
                 <div>
                   <p className="text-muted-foreground">Fee Status</p>
 
-                  <Badge variant="secondary">{value(student.feeStatus)}</Badge>
+                  <Badge
+                    variant={
+                      student.feeStatus === "Paid" ? "success" : "warning"
+                    }
+                  >
+                    {value(student.feeStatus)}
+                  </Badge>
                 </div>
-              </div>{" "}
+              </div>
               <div className="grid grid-cols-5 gap-2">
-                <Link href={`/features/students/${student.id}`}>
-                  <Button variant="outline" size="icon" className="w-full">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-full"
+                  disabled={activeRow === student.id}
+                  onClick={() => {
+                    setActiveRow(student.id);
+                    router.push(`/features/students/${student.id}`);
+                  }}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
 
                 <Button
                   variant="outline"
@@ -314,7 +343,9 @@ export default function StudentTable({
               {filteredStudents.map((student) => (
                 <tr
                   key={student.id}
-                  className="border-b transition hover:bg-slate-50"
+                  className={`border-b transition-all duration-200 hover:bg-slate-50 ${
+                    activeRow === student.id ? "opacity-60 scale-[0.99]" : ""
+                  }`}
                 >
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-4">
@@ -374,7 +405,7 @@ export default function StudentTable({
                   <td className="px-6 text-center">
                     <Badge
                       variant={
-                        student.feeStatus === "Paid" ? "default" : "secondary"
+                        student.feeStatus === "Paid" ? "success" : "warning"
                       }
                     >
                       {value(student.feeStatus)}
@@ -384,7 +415,7 @@ export default function StudentTable({
                   <td className="px-6 text-center">
                     <Badge
                       variant={
-                        student.status === "Active" ? "default" : "destructive"
+                        student.status === "Active" ? "success" : "danger"
                       }
                     >
                       {value(student.status)}
