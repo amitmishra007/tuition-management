@@ -49,7 +49,7 @@ export default function StudentProfileCard({
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col items-center gap-6 sm:flex-row">
             <Image
-              src={student.profilePhoto}
+              src={student.profilePhoto ?? ""}
               alt={student.firstName}
               width={120}
               height={120}
@@ -378,7 +378,10 @@ export default function StudentProfileCard({
               </p>
 
               <p className="text-3xl font-bold text-emerald-600">
-                ₹ {student.monthlyFee.toLocaleString("en-IN")}
+                ₹{" "}
+                {student.monthlyFee
+                  ? student.monthlyFee.toLocaleString("en-IN")
+                  : ""}
               </p>
             </div>
 
