@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
 import StudentEditForm from "../../components/StudentEditForm";
-import { supabaseServer } from "@/lib/supabase/server";
-import { Student } from "../../types/student";
+import type { Student } from "../../types/student";
 
 interface PageProps {
   params: Promise<{
@@ -12,7 +13,9 @@ interface PageProps {
 export default async function StudentEditPage({ params }: PageProps) {
   const { id } = await params;
 
-  const { data, error } = await supabaseServer
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
     .from("students")
     .select("*")
     .eq("id", id)

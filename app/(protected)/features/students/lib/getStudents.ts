@@ -1,9 +1,9 @@
 // app/features/students/lib/getStudents.ts
 
-import { supabaseServer } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function getStudents() {
-  const supabase = supabaseServer;
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("students")

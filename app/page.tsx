@@ -1,21 +1,17 @@
-import StudentTable from "./features/students/components/StudentTable";
-import { supabaseServer } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
-  const { data: students, error } = await supabaseServer
-    .from("students")
-    .select("*")
-    .order("firstName");
+  const supabase = await createClient();
 
-  if (error) {
-    console.error(error);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/features/dashboard");
   }
 
-  return (
-    <main className="min-h-screen bg-slate-100 p-8">
-      <div className="mx-auto max-w-7xl">
-        <StudentTable students={students ?? []} />
-      </div>
-    </main>
-  );
+  redirect("/login");
 }

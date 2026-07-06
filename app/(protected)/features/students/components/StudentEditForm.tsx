@@ -54,7 +54,11 @@ interface Props {
 }
 
 export default function StudentEditForm({ student }: Props) {
-  const [profileUrl, setProfileUrl] = useState(student.profilePhoto);
+  const [profileUrl, setProfileUrl] = useState(student.profilePhoto ?? "");
+
+  const [profilePreview, setProfilePreview] = useState(
+    student.profilePhoto ?? "/images/default-avatar.png",
+  );
   const [uploading, setUploading] = useState(false);
   const { register, handleSubmit, control } = useForm<Student>({
     defaultValues: student,
@@ -95,8 +99,6 @@ export default function StudentEditForm({ student }: Props) {
       setLoading(false);
     }
   };
-
-  const [profilePreview, setProfilePreview] = useState(student.profilePhoto);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -290,7 +292,10 @@ export default function StudentEditForm({ student }: Props) {
                 control={control}
                 name="status"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger className="mt-2">
                       <SelectValue />
                     </SelectTrigger>
@@ -439,7 +444,10 @@ export default function StudentEditForm({ student }: Props) {
                 control={control}
                 name="batch"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value ?? undefined}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger className="mt-2">
                       <SelectValue />
                     </SelectTrigger>
@@ -499,9 +507,12 @@ export default function StudentEditForm({ student }: Props) {
                 control={control}
                 name="feeStatus"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value ?? undefined}
+                    onValueChange={field.onChange}
+                  >
                     <SelectTrigger className="mt-2">
-                      <SelectValue />
+                      <SelectValue placeholder="Select Fee Status" />
                     </SelectTrigger>
 
                     <SelectContent>

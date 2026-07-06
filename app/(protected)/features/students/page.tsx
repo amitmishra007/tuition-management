@@ -1,14 +1,16 @@
 import StudentTable from "../students/components/StudentTable";
 import type { Student } from "../students/types/student";
 
-import { supabaseServer } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { mapStudent } from "../students/lib/mapStudent";
 
 export default async function StudentsPage() {
-  const { data, error } = await supabaseServer
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
     .from("students")
     .select("*")
-    .order("firstname", { ascending: true });
+    .order("firstName", { ascending: true });
 
   if (error) {
     console.error("Failed to fetch students:", error);

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { supabaseServer } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import StudentProfileCard from "../components/StudentProfileCard";
 import BackButton from "../components/BackButton";
 import type { Student } from "../types/student";
@@ -14,7 +14,9 @@ interface PageProps {
 export default async function StudentViewPage({ params }: PageProps) {
   const { id } = await params;
 
-  const { data, error } = await supabaseServer
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
     .from("students")
     .select("*")
     .eq("id", id)
