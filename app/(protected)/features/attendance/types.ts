@@ -1,20 +1,23 @@
+import type { Student } from "../students/types/student";
+
 export type DayStatus = "HOLIDAY" | "RECORDED" | "NOT_RECORDED";
 
-export type Holiday = {
+export interface Holiday {
   id: string;
   holiday_date: string;
   title: string;
-  description?: string;
-};
+  description: string | null;
+}
 
-export type Attendance = {
+export interface Attendance {
   id: string;
   student_id: string;
   attendance_date: string;
   status: "Present" | "Absent";
-};
+}
 
-export type DayData =
-  | { status: "HOLIDAY"; holiday: Holiday }
-  | { status: "RECORDED"; attendance: Attendance[] }
-  | { status: "NOT_RECORDED" };
+export type AttendanceSheetRow = {
+  student: Student;
+  status: "Present" | "Absent";
+  attendanceId: string | null;
+};

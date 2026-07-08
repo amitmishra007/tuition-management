@@ -6,7 +6,7 @@ import type { Database } from "@/types/db";
 
 type AttendanceRow = Database["public"]["Tables"]["attendance"]["Row"];
 
-type HolidayRow = Database["public"]["Tables"]["holidays"]["Row"];
+export type HolidayRow = Database["public"]["Tables"]["holidays"]["Row"];
 
 type AttendanceSheetRow = {
   student: Student;
@@ -15,9 +15,18 @@ type AttendanceSheetRow = {
 };
 
 export type DayData =
-  | { status: "HOLIDAY"; holiday: HolidayRow }
-  | { status: "RECORDED"; sheet: AttendanceSheetRow[] }
-  | { status: "NOT_RECORDED" };
+  | {
+      status: "HOLIDAY";
+      holiday: HolidayRow;
+    }
+  | {
+      status: "RECORDED";
+      sheet: AttendanceSheetRow[];
+    }
+  | {
+      status: "NOT_RECORDED";
+      sheet: AttendanceSheetRow[];
+    };
 
 /* ================= MAIN FUNCTION ================= */
 

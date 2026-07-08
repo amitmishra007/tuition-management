@@ -28,16 +28,6 @@ import {
 
 import { Calendar } from "@/components/ui/calendar";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { Textarea } from "@/components/ui/textarea";
-
 import { cn } from "@/lib/utils";
 
 interface StudentDialogProps {

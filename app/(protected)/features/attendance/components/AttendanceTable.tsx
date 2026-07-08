@@ -1,131 +1,250 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { saveAttendance } from "../lib/attendanceMutations";
+import Image from "next/image";
+import { useMemo } from "react";
+import { Check, UserRound, X } from "lucide-react";
 
-/* ================= TYPES ================= */
+import type { AttendanceSheetRow } from "../types";
 
-type Student = {
-  id: string;
-  firstName: string;
-  lastName: string;
-};
-
-type Row = {
-  student: Student;
-  status: "Present" | "Absent";
-  attendanceId: string | null;
-};
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 type Props = {
-  date: string;
-  data: Row[];
-  onRefresh: () => void;
+  rows: AttendanceSheetRow[];
+  search: string;
+  batch: string;
+  onRowsChange: (rows: AttendanceSheetRow[]) => void;
 };
 
-/* ================= COMPONENT ================= */
+export default function AttendanceTable({
+  rows,
+  search,
+  batch,
+  onRowsChange,
+}: Props) {
+  const filteredRows = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-export default function AttendanceTable({ date, data, onRefresh }: Props) {
-  const [saving, setSaving] = useState(false);
+    return rows.filter((row) => {
+      const fullName =
+        `${row.student.firstName} ${row.student.lastName}`.toLowerCase();
 
-  /* 🔥 LOCAL EDITS ONLY */
-  const [changes, setChanges] = useState<Record<string, "Present" | "Absent">>(
-    {},
-  );
+      const admission = (row.student.admissionNo ?? "").toLowerCase();
 
-  /* ================= DERIVED STATE ================= */
+      const matchesSearch =
+        query.length === 0 ||
+        fullName.includes(query) ||
+        admission.includes(query);
 
-  const rows = useMemo(() => {
-    return data.map((row) => ({
-      ...row,
-      status: changes[row.student.id] ?? row.status,
-    }));
-  }, [data, changes]);
+      const matchesBatch = batch === "all" || row.student.batch === batch;
 
-  /* ================= TOGGLE ================= */
+      return matchesSearch && matchesBatch;
+    });
+  }, [rows, search, batch]);
 
-  const toggle = (studentId: string, status: "Present" | "Absent") => {
-    setChanges((prev) => ({
-      ...prev,
-      [studentId]: status,
-    }));
+  const updateStatus = (studentId: string, status: "Present" | "Absent") => {
+    onRowsChange(
+      rows.map((row) =>
+        row.student.id === studentId
+          ? {
+              ...row,
+              status,
+            }
+          : row,
+      ),
+    );
   };
 
-  /* ================= SAVE ================= */
+  if (!filteredRows.length) {
+    return (
+      <div className="rounded-3xl border bg-white py-16 text-center shadow-sm">
+        <UserRound className="mx-auto mb-4 h-12 w-12 text-slate-300" />
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
+        <h3 className="text-lg font-semibold">No students found</h3>
 
-      await saveAttendance(
-        date,
-        rows.map((r) => ({
-          student_id: r.student.id,
-          status: r.status,
-        })),
-      );
-
-      setChanges({}); // clear local edits after save
-      await onRefresh();
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  /* ================= UI ================= */
+        <p className="mt-2 text-sm text-muted-foreground">
+          Try changing the search text or batch filter.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h2 className="font-semibold">Attendance Sheet - {date}</h2>
+      {filteredRows.map((row) => {
+        const student = row.student;
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save Attendance"}
-        </button>
-      </div>
+        const initials = `${student.firstName?.charAt(0) ?? ""}${student.lastName?.charAt(0) ?? ""}`;
 
-      {/* TABLE */}
-      <div className="space-y-2">
-        {rows.map((row) => (
+        return (
           <div
-            key={row.student.id}
-            className="flex justify-between items-center border p-3 rounded"
+            key={student.id}
+            className="
+              rounded-3xl
+              border
+              bg-white
+              p-5
+              shadow-sm
+              transition-all
+              duration-200
+              hover:-translate-y-1
+              hover:shadow-lg
+            "
           >
-            <span>
-              {row.student.firstName} {row.student.lastName}
-            </span>
+            <div
+              className="
+              flex
+              flex-col
+              gap-5
+              lg:flex-row
+              lg:items-center
+              lg:justify-between
+            "
+            >
+              {/* Student Info */}
+              <div className="flex items-center gap-4">
+                <div
+                  className="
+                    relative
+                    h-16
+                    w-16
+                    overflow-hidden
+                    rounded-full
+                    border-2
+                    border-slate-200
+                    bg-slate-100
+                  "
+                >
+                  {student.profilePhoto ? (
+                    <Image
+                      src={student.profilePhoto}
+                      alt={`${student.firstName} ${student.lastName}`}
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="
+                        flex
+                        h-full
+                        w-full
+                        items-center
+                        justify-center
+                        text-lg
+                        font-bold
+                        text-slate-600
+                      "
+                    >
+                      {initials}
+                    </div>
+                  )}
+                </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={() => toggle(row.student.id, "Present")}
-                className={
-                  row.status === "Present"
-                    ? "text-green-600 font-bold"
-                    : "text-gray-500"
-                }
-              >
-                Present
-              </button>
+                <div>
+                  <h3 className="text-lg font-bold">
+                    {student.firstName} {student.lastName}
+                  </h3>
 
-              <button
-                onClick={() => toggle(row.student.id, "Absent")}
-                className={
-                  row.status === "Absent"
-                    ? "text-red-600 font-bold"
-                    : "text-gray-500"
-                }
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {student.admissionNo && (
+                      <Badge variant="info">{student.admissionNo}</Badge>
+                    )}
+
+                    <Badge variant="neutral">
+                      {student.batch ?? "No Batch"}
+                    </Badge>
+
+                    {row.status && (
+                      <Badge
+                        variant={
+                          row.status === "Present" ? "success" : "danger"
+                        }
+                      >
+                        {row.status}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Attendance Buttons */}
+              <div
+                className="
+                  flex
+                  w-full
+                  gap-3
+                  lg:w-auto
+                "
               >
-                Absent
-              </button>
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={() => updateStatus(student.id, "Present")}
+                  className={`
+                    flex-1
+                    rounded-2xl
+                    transition-all
+                    lg:min-w-40
+
+                    ${
+                      row.status === "Present"
+                        ? `
+                          bg-emerald-600
+                          text-white
+                          shadow-md
+                          hover:bg-emerald-700
+                        `
+                        : `
+                          border
+                          border-emerald-200
+                          bg-emerald-50
+                          text-emerald-700
+                          hover:bg-emerald-100
+                        `
+                    }
+                  `}
+                >
+                  <Check className="mr-2 h-5 w-5" />
+                  Present
+                </Button>
+
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={() => updateStatus(student.id, "Absent")}
+                  className={`
+                    flex-1
+                    rounded-2xl
+                    transition-all
+                    lg:min-w-40
+
+                    ${
+                      row.status === "Absent"
+                        ? `
+                          bg-red-600
+                          text-white
+                          shadow-md
+                          hover:bg-red-700
+                        `
+                        : `
+                          border
+                          border-red-200
+                          bg-red-50
+                          text-red-700
+                          hover:bg-red-100
+                        `
+                    }
+                  `}
+                >
+                  <X className="mr-2 h-5 w-5" />
+                  Absent
+                </Button>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
