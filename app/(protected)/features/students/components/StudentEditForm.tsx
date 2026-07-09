@@ -6,7 +6,6 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   ArrowLeft,
-  CalendarIcon,
   Camera,
   Save,
   X,
@@ -14,26 +13,16 @@ import {
   UserRound,
   Venus,
   Mars,
-  CalendarDays,
   BadgeCheck,
 } from "lucide-react";
 
-import { format } from "date-fns";
-
 import type { Student } from "../types/student";
-
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -45,15 +34,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { updateStudent } from "../action";
+import { createStudent, updateStudent } from "../action";
 import { uploadToCloudinary } from "../lib/uploadToCloudinary";
 import BackButton from "./BackButton";
 
 interface Props {
   student: Student;
+  mode?: "create" | "edit";
 }
 
-export default function StudentEditForm({ student }: Props) {
+export default function StudentEditForm({ student, mode = "edit" }: Props) {
   const [profileUrl, setProfileUrl] = useState(student.profilePhoto ?? "");
 
   const [profilePreview, setProfilePreview] = useState(
@@ -85,14 +75,44 @@ export default function StudentEditForm({ student }: Props) {
     setLoading(true);
 
     try {
-      const { ...updateData } = values;
-
       const finalData = {
-        ...updateData,
-        profilePhoto: profileUrl, // 🔥 IMPORTANT
+        ...values,
+        profilePhoto: profileUrl,
       };
 
-      await updateStudent(student.id, finalData);
+      if (mode === "edit") {
+        await updateStudent(student.id, finalData);
+      } else {
+        const newStudent = {
+          admissionNo: finalData.admissionNo,
+          firstName: finalData.firstName,
+          lastName: finalData.lastName,
+          gender: finalData.gender,
+          dob: finalData.dob,
+          joiningDate: finalData.joiningDate,
+          fatherName: finalData.fatherName,
+          motherName: finalData.motherName,
+          phone: finalData.phone,
+          alternatePhone: finalData.alternatePhone,
+          email: finalData.email,
+          address: finalData.address,
+          city: finalData.city,
+          state: finalData.state,
+          pincode: finalData.pincode,
+          school: finalData.school,
+          studentClass: finalData.studentClass,
+          batch: finalData.batch,
+          monthlyFee: finalData.monthlyFee,
+          feeStatus: finalData.feeStatus,
+          lastFeePaid: finalData.lastFeePaid,
+          nextDueDate: finalData.nextDueDate,
+          profilePhoto: finalData.profilePhoto,
+          remarks: finalData.remarks,
+          status: finalData.status,
+        };
+
+        await createStudent(newStudent);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -146,9 +166,15 @@ export default function StudentEditForm({ student }: Props) {
             </Button>
           </Link>
 
-          <h1 className="text-3xl font-bold">Edit Student</h1>
+          <h1 className="text-3xl font-bold">
+            {mode === "edit" ? "Edit Student" : "Add Student"}
+          </h1>
 
-          <p className="text-muted-foreground">Update student information.</p>
+          <p className="text-muted-foreground">
+            {mode === "edit"
+              ? "Update student information."
+              : "Fill in the student's information."}
+          </p>
         </div>
 
         <div className="flex gap-3">
@@ -159,9 +185,21 @@ export default function StudentEditForm({ student }: Props) {
             </Button>
           </Link>
 
-          <Button type="submit" size="lg" disabled={loading}>
-            <Save className="mr-2 h-4 w-4" />
-            {loading ? "Saving..." : "Save Changes"}
+          <Button type="submit" size="lg" disabled={loading || uploading}>
+            {uploading || loading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            {uploading
+              ? "Uploading Photo..."
+              : loading
+                ? mode === "edit"
+                  ? "Saving..."
+                  : "Adding..."
+                : mode === "edit"
+                  ? "Save Changes"
+                  : "Add Student"}
           </Button>
         </div>
       </div>
@@ -188,16 +226,47 @@ export default function StudentEditForm({ student }: Props) {
                 height={130}
                 className="h-32.5 w-32.5 object-cover transition duration-300 group-hover:scale-105"
               />
+              {uploading && (
+                <div
+                  className="
+      absolute inset-0
+      flex flex-col items-center justify-center
+      bg-black/60
+      backdrop-blur-sm
+      text-white
+    "
+                >
+                  <Loader2 className="mb-3 h-8 w-8 animate-spin" />
 
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
-                <Camera className="h-7 w-7 text-white" />
-              </div>
+                  <p className="text-sm font-semibold">Uploading Photo...</p>
+
+                  <p className="mt-1 px-4 text-center text-xs text-white/80">
+                    Please wait a few seconds
+                  </p>
+                </div>
+              )}
+
+              {!uploading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
+                  <Camera className="h-7 w-7 text-white" />
+                </div>
+              )}
             </div>
 
             <p className="text-center text-xs text-muted-foreground">
-              Click or drag a photo here
-              <br />
-              JPG • PNG • WEBP (Max 2 MB)
+              {uploading ? (
+                <>
+                  Uploading image...
+                  <br />
+                  Please wait.
+                </>
+              ) : (
+                <>
+                  Click or drag a photo here
+                  <br />
+                  JPG • PNG • WEBP (Max 2 MB)
+                </>
+              )}
             </p>
           </div>
 
@@ -223,27 +292,26 @@ export default function StudentEditForm({ student }: Props) {
         </CardContent>
       </Card>
       {/* Personal Details */}
+      {/* Personal Details */}
       <Card className="rounded-3xl border-blue-200">
-        <CardContent className="p-8">
-          <h2 className="mb-8 flex items-center gap-2 border-b pb-4 text-xl font-bold text-blue-700">
+        <CardContent className="p-6 sm:p-8">
+          <h2 className="mb-8 flex items-center gap-2 border-b border-blue-100 pb-4 text-xl font-bold text-blue-700">
             <User className="h-5 w-5" />
             Personal Details
           </h2>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="min-w-0">
               <Label>First Name</Label>
-
-              <Input {...register("firstName")} className="mt-2" />
+              <Input {...register("firstName")} className="mt-2 w-full" />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <Label>Last Name</Label>
-
-              <Input {...register("lastName")} className="mt-2" />
+              <Input {...register("lastName")} className="mt-2 w-full" />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <Label className="mb-3 flex items-center gap-2">
                 <UserRound className="h-4 w-4 text-blue-600" />
                 Gender
@@ -256,11 +324,14 @@ export default function StudentEditForm({ student }: Props) {
                   <RadioGroup
                     value={field.value}
                     onValueChange={field.onChange}
-                    className="flex gap-8"
+                    className="flex flex-wrap gap-4"
                   >
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="Male" id="male" />
-                      <Label htmlFor="male" className="flex items-center gap-1">
+                      <Label
+                        htmlFor="male"
+                        className="flex cursor-pointer items-center gap-1"
+                      >
                         <Mars className="h-4 w-4 text-blue-600" />
                         Male
                       </Label>
@@ -270,7 +341,7 @@ export default function StudentEditForm({ student }: Props) {
                       <RadioGroupItem value="Female" id="female" />
                       <Label
                         htmlFor="female"
-                        className="flex items-center gap-1"
+                        className="flex cursor-pointer items-center gap-1"
                       >
                         <Venus className="h-4 w-4 text-pink-600" />
                         Female
@@ -279,15 +350,18 @@ export default function StudentEditForm({ student }: Props) {
 
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="Other" id="other" />
-                      <Label htmlFor="other">Other</Label>
+                      <Label htmlFor="other" className="cursor-pointer">
+                        Other
+                      </Label>
                     </div>
                   </RadioGroup>
                 )}
               />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <Label>Status</Label>
+
               <Controller
                 control={control}
                 name="status"
@@ -296,8 +370,8 @@ export default function StudentEditForm({ student }: Props) {
                     value={field.value ?? ""}
                     onValueChange={field.onChange}
                   >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
+                    <SelectTrigger className="mt-2 w-full">
+                      <SelectValue placeholder="Select Status" />
                     </SelectTrigger>
 
                     <SelectContent>
@@ -309,70 +383,42 @@ export default function StudentEditForm({ student }: Props) {
               />
             </div>
 
-            <Controller
-              control={control}
-              name="dob"
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="mt-2 w-full justify-start"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+            <div className="min-w-0">
+              <Label>Date of Birth</Label>
 
-                      {field.value
-                        ? format(new Date(field.value), "EEEE, dd MMM yyyy")
-                        : "Select Date"}
-                    </Button>
-                  </PopoverTrigger>
+              <Controller
+                control={control}
+                name="dob"
+                render={({ field }) => (
+                  <Input
+                    type="date"
+                    value={field.value ? field.value.slice(0, 10) : ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    className="mt-2 w-full"
+                  />
+                )}
+              />
+            </div>
 
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date?.toISOString() ?? "")
-                      }
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
+            <div className="min-w-0">
+              <Label>Joining Date</Label>
 
-            <Controller
-              control={control}
-              name="joiningDate"
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="mt-2 w-full justify-start"
-                    >
-                      <CalendarDays className="mr-2 h-4 w-4" />
-
-                      {field.value
-                        ? format(new Date(field.value), "EEEE, dd MMM yyyy")
-                        : "Select Date"}
-                    </Button>
-                  </PopoverTrigger>
-
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date?.toISOString() ?? "")
-                      }
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
+              <Controller
+                control={control}
+                name="joiningDate"
+                render={({ field }) => (
+                  <Input
+                    type="date"
+                    value={field.value ? field.value.slice(0, 10) : ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    className="mt-2 w-full"
+                  />
+                )}
+              />
+            </div>
           </div>
         </CardContent>
-      </Card>{" "}
+      </Card>
       {/* Parent Details */}
       <Card className="rounded-3xl border-purple-200">
         <CardContent className="p-8">
@@ -531,31 +577,12 @@ export default function StudentEditForm({ student }: Props) {
                 control={control}
                 name="lastFeePaid"
                 render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="mt-2 w-full justify-start"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value
-                          ? format(new Date(field.value), "EEEE, dd MMM yyyy")
-                          : "Select Date"}
-                      </Button>
-                    </PopoverTrigger>
-
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={
-                          field.value ? new Date(field.value) : undefined
-                        }
-                        onSelect={(date) =>
-                          field.onChange(date?.toISOString() ?? "")
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    type="date"
+                    value={field.value ? field.value.slice(0, 10) : ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    className="mt-2 w-full"
+                  />
                 )}
               />
             </div>
@@ -567,31 +594,12 @@ export default function StudentEditForm({ student }: Props) {
                 control={control}
                 name="nextDueDate"
                 render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="mt-2 w-full justify-start"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value
-                          ? format(new Date(field.value), "EEEE, dd MMM yyyy")
-                          : "Select Date"}
-                      </Button>
-                    </PopoverTrigger>
-
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={
-                          field.value ? new Date(field.value) : undefined
-                        }
-                        onSelect={(date) =>
-                          field.onChange(date?.toISOString() ?? "")
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    type="date"
+                    value={field.value ? field.value.slice(0, 10) : ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    className="mt-2 w-full"
+                  />
                 )}
               />
             </div>
@@ -651,9 +659,21 @@ export default function StudentEditForm({ student }: Props) {
           </Button>
         </Link>
 
-        <Button type="submit" size="lg" disabled={loading}>
-          <Save className="mr-2 h-4 w-4" />
-          {loading ? "Saving..." : "Save Changes"}
+        <Button type="submit" size="lg" disabled={loading || uploading}>
+          {uploading || loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
+          {uploading
+            ? "Uploading Photo..."
+            : loading
+              ? mode === "edit"
+                ? "Saving..."
+                : "Adding..."
+              : mode === "edit"
+                ? "Save Changes"
+                : "Add Student"}
         </Button>
       </div>
     </form>

@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase/client";
 import type { Student } from "@/app/(protected)/features/students/types/student";
 import type { Database } from "@/types/db";
+import type { AttendanceSheetRow, AttendanceStatus, DayStatus } from "../types";
 
 /* ================= TYPES ================= */
 
@@ -8,23 +9,13 @@ type AttendanceRow = Database["public"]["Tables"]["attendance"]["Row"];
 
 export type HolidayRow = Database["public"]["Tables"]["holidays"]["Row"];
 
-type AttendanceSheetRow = {
-  student: Student;
-  status: "Present" | "Absent";
-  attendanceId: string | null;
-};
-
 export type DayData =
   | {
       status: "HOLIDAY";
       holiday: HolidayRow;
     }
   | {
-      status: "RECORDED";
-      sheet: AttendanceSheetRow[];
-    }
-  | {
-      status: "NOT_RECORDED";
+      status: Exclude<DayStatus, "HOLIDAY">;
       sheet: AttendanceSheetRow[];
     };
 
@@ -54,18 +45,30 @@ export async function getAttendanceSheet(date: string): Promise<DayData> {
 
   const attendanceMap = new Map(attendance.map((a) => [a.student_id, a]));
 
+  const markedCount = attendance.length;
+
+  let dayStatus: Exclude<DayStatus, "HOLIDAY">;
+
+  if (markedCount === 0) {
+    dayStatus = "NOT_RECORDED";
+  } else if (markedCount === students.length) {
+    dayStatus = "RECORDED";
+  } else {
+    dayStatus = "PARTIALLY_RECORDED";
+  }
+
   const sheet: AttendanceSheetRow[] = students.map((student) => {
     const record = attendanceMap.get(student.id);
 
     return {
       student,
-      status: record?.status ?? "Absent",
+      status: (record?.status ?? "Unmarked") as AttendanceStatus,
       attendanceId: record?.id ?? null,
     };
   });
 
   return {
-    status: attendance.length ? "RECORDED" : "NOT_RECORDED",
+    status: dayStatus,
     sheet,
   };
 }

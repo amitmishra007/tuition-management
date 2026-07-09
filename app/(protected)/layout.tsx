@@ -5,6 +5,8 @@ import DashboardShell from "./DashboardShell";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
+import { Toaster } from "sonner";
+
 export default async function ProtectedLayout({
   children,
 }: {
@@ -21,8 +23,12 @@ export default async function ProtectedLayout({
     .single();
 
   return (
-    <DashboardShell username={profile?.username ?? "User"}>
-      {children}
-    </DashboardShell>
+    <>
+      <DashboardShell username={profile?.username ?? "User"}>
+        {children}
+      </DashboardShell>
+
+      <Toaster position="top-right" richColors closeButton duration={4000} />
+    </>
   );
 }

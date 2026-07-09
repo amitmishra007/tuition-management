@@ -1,5 +1,5 @@
 "use client";
-
+import type { DayStatus } from "./types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import HolidayDialog from "./components/HolidayDialog";
 import AttendanceActions from "./components/AttendanceActions";
@@ -13,6 +13,7 @@ import { getAttendanceSheet, type HolidayRow } from "./lib/attendanceService";
 import { removeHoliday } from "./lib/holidayMutations";
 import { Button } from "@/components/ui/button";
 import RemoveHolidayDialog from "./components/RemoveHolidayDialog";
+import { toast } from "sonner";
 
 export default function AttendancePage() {
   const [date, setDate] = useState(
@@ -21,9 +22,11 @@ export default function AttendancePage() {
   const [saving, setSaving] = useState(false);
   const [holidayDialogOpen, setHolidayDialogOpen] = useState(false);
   const [rows, setRows] = useState<AttendanceSheetRow[]>([]);
-  const [status, setStatus] = useState<"RECORDED" | "NOT_RECORDED" | "HOLIDAY">(
-    "NOT_RECORDED",
-  );
+
+  const [status, setStatus] = useState<DayStatus>("NOT_RECORDED");
+
+  const [originalRows, setOriginalRows] = useState<AttendanceSheetRow[]>([]);
+  const [highlightedIds, setHighlightedIds] = useState<string[]>([]);
 
   const [holiday, setHoliday] = useState<HolidayRow | null>(null);
 
@@ -54,6 +57,7 @@ export default function AttendancePage() {
         setHoliday(null);
         setStatus(result.status);
         setRows(result.sheet);
+        setOriginalRows(structuredClone(result.sheet));
       }
     } catch (err) {
       console.error(err);
@@ -64,17 +68,38 @@ export default function AttendancePage() {
 
   const handleSave = async () => {
     try {
+      const unmarked = rows.filter((r) => r.status === "Unmarked");
+
+      if (unmarked.length > 0) {
+        setHighlightedIds(unmarked.map((r) => r.student.id));
+
+        toast.warning(
+          `${unmarked.length} student${unmarked.length > 1 ? "s are" : " is"} still unmarked.`,
+        );
+
+        return;
+      }
       setSaving(true);
 
       await saveAttendance(
         date,
-        rows.map((row) => ({
-          student_id: row.student.id,
-          status: row.status,
-        })),
+        rows
+          .filter(
+            (
+              row,
+            ): row is AttendanceSheetRow & {
+              status: "Present" | "Absent";
+            } => row.status !== "Unmarked",
+          )
+          .map((row) => ({
+            student_id: row.student.id,
+            status: row.status,
+          })),
       );
 
       setStatus("RECORDED");
+      setOriginalRows(structuredClone(rows));
+      setHighlightedIds([]);
     } catch (error) {
       console.error(error);
       alert("Failed to save attendance.");
@@ -109,6 +134,7 @@ export default function AttendancePage() {
           setHoliday(null);
           setStatus(result.status);
           setRows(result.sheet);
+          setOriginalRows(structuredClone(result.sheet));
         }
       } catch (err) {
         if (!cancelled) {
@@ -144,14 +170,26 @@ export default function AttendancePage() {
 
   const summary = useMemo(() => {
     const present = rows.filter((r) => r.status === "Present").length;
+
     const absent = rows.filter((r) => r.status === "Absent").length;
+
+    const unmarked = rows.filter((r) => r.status === "Unmarked").length;
 
     return {
       present,
       absent,
+      unmarked,
       total: rows.length,
     };
   }, [rows]);
+
+  const hasChanges = useMemo(() => {
+    if (rows.length !== originalRows.length) return false;
+
+    return rows.some((row, index) => {
+      return row.status !== originalRows[index].status;
+    });
+  }, [rows, originalRows]);
 
   const handleMarkAllPresent = () => {
     setRows((prev) =>
@@ -171,6 +209,7 @@ export default function AttendancePage() {
       <AttendanceSummary
         present={summary.present}
         absent={summary.absent}
+        unmarked={summary.unmarked}
         total={summary.total}
         status={status}
       />
@@ -181,6 +220,7 @@ export default function AttendancePage() {
         batch={batch}
         onBatchChange={setBatch}
         batches={batches}
+        hasChanges={hasChanges}
         saving={saving}
         isHoliday={status === "HOLIDAY"}
         onMarkAllPresent={handleMarkAllPresent}
@@ -238,7 +278,17 @@ export default function AttendancePage() {
           rows={rows}
           search={search}
           batch={batch}
-          onRowsChange={setRows}
+          highlightedIds={highlightedIds}
+          onRowsChange={(updatedRows) => {
+            setRows(updatedRows);
+
+            setHighlightedIds((prev) =>
+              prev.filter((id) => {
+                const row = updatedRows.find((r) => r.student.id === id);
+                return row?.status === "Unmarked";
+              }),
+            );
+          }}
         />
       )}
       <HolidayDialog
@@ -256,6 +306,7 @@ export default function AttendancePage() {
             setHoliday(null);
             setStatus(result.status);
             setRows(result.sheet);
+            setOriginalRows(structuredClone(result.sheet));
           }
         }}
       />

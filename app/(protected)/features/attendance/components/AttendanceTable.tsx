@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Check, UserRound, X } from "lucide-react";
 
 import type { AttendanceSheetRow } from "../types";
@@ -13,6 +13,9 @@ type Props = {
   rows: AttendanceSheetRow[];
   search: string;
   batch: string;
+
+  highlightedIds: string[];
+
   onRowsChange: (rows: AttendanceSheetRow[]) => void;
 };
 
@@ -20,8 +23,10 @@ export default function AttendanceTable({
   rows,
   search,
   batch,
+  highlightedIds,
   onRowsChange,
 }: Props) {
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const filteredRows = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -41,6 +46,19 @@ export default function AttendanceTable({
       return matchesSearch && matchesBatch;
     });
   }, [rows, search, batch]);
+
+  useEffect(() => {
+    if (!highlightedIds.length) return;
+
+    const first = rowRefs.current[highlightedIds[0]];
+
+    if (first) {
+      first.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [highlightedIds]);
 
   const updateStatus = (studentId: string, status: "Present" | "Absent") => {
     onRowsChange(
@@ -73,23 +91,31 @@ export default function AttendanceTable({
     <div className="space-y-4">
       {filteredRows.map((row) => {
         const student = row.student;
-
+        const isHighlighted = highlightedIds.includes(student.id);
         const initials = `${student.firstName?.charAt(0) ?? ""}${student.lastName?.charAt(0) ?? ""}`;
 
         return (
           <div
             key={student.id}
-            className="
-              rounded-3xl
-              border
-              bg-white
-              p-5
-              shadow-sm
-              transition-all
-              duration-200
-              hover:-translate-y-1
-              hover:shadow-lg
-            "
+            ref={(el) => {
+              rowRefs.current[student.id] = el;
+            }}
+            className={`
+  rounded-3xl
+  border
+  p-5
+  shadow-sm
+  transition-all
+  duration-300
+  hover:-translate-y-1
+  hover:shadow-lg
+
+  ${
+    isHighlighted
+      ? "border-red-500 bg-red-50 ring-2 ring-red-300 animate-pulse"
+      : "border-slate-200 bg-white"
+  }
+`}
           >
             <div
               className="
@@ -155,15 +181,17 @@ export default function AttendanceTable({
                       {student.batch ?? "No Batch"}
                     </Badge>
 
-                    {row.status && (
-                      <Badge
-                        variant={
-                          row.status === "Present" ? "success" : "danger"
-                        }
-                      >
-                        {row.status}
-                      </Badge>
-                    )}
+                    <Badge
+                      variant={
+                        row.status === "Present"
+                          ? "success"
+                          : row.status === "Absent"
+                            ? "danger"
+                            : "warning"
+                      }
+                    >
+                      {row.status}
+                    </Badge>
                   </div>
                 </div>
               </div>

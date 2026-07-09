@@ -1,6 +1,10 @@
 import type { Student } from "../students/types/student";
 
-export type DayStatus = "HOLIDAY" | "RECORDED" | "NOT_RECORDED";
+export type DayStatus =
+  | "HOLIDAY"
+  | "RECORDED"
+  | "NOT_RECORDED"
+  | "PARTIALLY_RECORDED";
 
 export interface Holiday {
   id: string;
@@ -16,8 +20,10 @@ export interface Attendance {
   status: "Present" | "Absent";
 }
 
+export type AttendanceStatus = "Present" | "Absent" | "Unmarked";
+
 export type AttendanceSheetRow = {
   student: Student;
-  status: "Present" | "Absent";
+  status: AttendanceStatus;
   attendanceId: string | null;
 };

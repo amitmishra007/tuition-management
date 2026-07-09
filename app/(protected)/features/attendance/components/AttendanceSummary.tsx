@@ -1,23 +1,26 @@
 import {
   CalendarCheck2,
   CircleAlert,
+  Clock3,
   UserCheck,
   UserX,
   Users,
 } from "lucide-react";
-
+import type { DayStatus } from "../types";
 import { Card, CardContent } from "@/components/ui/card";
 
 type Props = {
   present: number;
   absent: number;
+  unmarked: number;
   total: number;
-  status: "RECORDED" | "NOT_RECORDED" | "HOLIDAY";
+  status: DayStatus;
 };
 
 export default function AttendanceSummary({
   present,
   absent,
+  unmarked,
   total,
   status,
 }: Props) {
@@ -27,10 +30,15 @@ export default function AttendanceSummary({
       icon: CalendarCheck2,
       className: "border-green-200 bg-green-50 text-green-700",
     },
-    NOT_RECORDED: {
-      label: "Attendance Pending",
+    PARTIALLY_RECORDED: {
+      label: "Partially Recorded",
       icon: CircleAlert,
       className: "border-amber-200 bg-amber-50 text-amber-700",
+    },
+    NOT_RECORDED: {
+      label: "Not Started",
+      icon: CircleAlert,
+      className: "border-orange-200 bg-orange-50 text-orange-700",
     },
     HOLIDAY: {
       label: "Holiday",
@@ -43,7 +51,7 @@ export default function AttendanceSummary({
   const StatusIcon = current.icon;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-4">
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
       <Card className="rounded-3xl border-green-200 shadow-sm">
         <CardContent className="flex items-center justify-between p-6">
           <div>
@@ -71,7 +79,19 @@ export default function AttendanceSummary({
           </div>
         </CardContent>
       </Card>
+      <Card className="rounded-3xl border-amber-200 shadow-sm">
+        <CardContent className="flex items-center justify-between p-6">
+          <div>
+            <p className="text-sm text-muted-foreground">Unmarked</p>
 
+            <h2 className="mt-2 text-3xl font-bold">{unmarked}</h2>
+          </div>
+
+          <div className="rounded-2xl bg-amber-100 p-3 text-amber-700">
+            <Clock3 className="h-6 w-6" />
+          </div>
+        </CardContent>
+      </Card>
       <Card className="rounded-3xl border-sky-200 shadow-sm">
         <CardContent className="flex items-center justify-between p-6">
           <div>

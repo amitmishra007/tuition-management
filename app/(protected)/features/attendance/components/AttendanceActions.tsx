@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
+import { startTransition } from "react";
 
 type Props = {
   search: string;
@@ -28,13 +30,11 @@ type Props = {
   batches: string[];
 
   saving: boolean;
-
+  hasChanges: boolean;
   isHoliday: boolean;
 
   onMarkAllPresent: () => void;
-
   onHoliday: () => void;
-
   onSave: () => void;
 };
 
@@ -45,6 +45,7 @@ export default function AttendanceActions({
   onBatchChange,
   batches,
   saving,
+  hasChanges,
   isHoliday,
   onMarkAllPresent,
   onHoliday,
@@ -52,24 +53,45 @@ export default function AttendanceActions({
 }: Props) {
   const disabled = saving || isHoliday;
 
+  const [activeAction, setActiveAction] = useState<
+    "present" | "holiday" | "save" | null
+  >(null);
+
+  const runAction = (
+    action: "present" | "holiday" | "save",
+    callback: () => void,
+  ) => {
+    setActiveAction(action);
+
+    startTransition(() => {
+      callback();
+
+      // allow parent state/navigation to begin
+      setTimeout(() => setActiveAction(null), 500);
+    });
+  };
+
   return (
-    <div className="rounded-3xl border bg-white p-6 shadow-sm">
+    <div
+      className={`rounded-3xl border bg-white p-6 shadow-sm transition-all duration-200 ${
+        activeAction ? "pointer-events-none opacity-60" : ""
+      }`}
+    >
       <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
         {/* Filters */}
         <div className="flex flex-1 flex-col gap-4 md:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
-
             <Input
               value={search}
               placeholder="Search by name or admission number..."
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
+              className="cursor-text pl-10"
             />
           </div>
 
           <Select value={batch} onValueChange={onBatchChange}>
-            <SelectTrigger className="w-full md:w-56">
+            <SelectTrigger className="w-full cursor-pointer md:w-56">
               <SelectValue placeholder="All Batches" />
             </SelectTrigger>
 
@@ -90,8 +112,9 @@ export default function AttendanceActions({
           <Button
             type="button"
             variant="outline"
-            disabled={disabled}
-            onClick={onMarkAllPresent}
+            disabled={disabled || activeAction !== null}
+            className="cursor-pointer"
+            onClick={() => runAction("present", onMarkAllPresent)}
           >
             <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
             Mark All Present
@@ -100,15 +123,25 @@ export default function AttendanceActions({
           <Button
             type="button"
             variant="outline"
-            disabled={saving || isHoliday}
-            onClick={onHoliday}
+            disabled={saving || isHoliday || activeAction !== null}
+            className="cursor-pointer"
+            onClick={() => runAction("holiday", onHoliday)}
           >
             <CalendarPlus className="mr-2 h-4 w-4" />
             Mark Holiday
           </Button>
 
-          <Button type="button" disabled={disabled} onClick={onSave}>
-            {saving ? (
+          <Button
+            type="button"
+            disabled={
+              disabled ||
+              activeAction !== null ||
+              (!hasChanges && status !== "NOT_RECORDED")
+            }
+            className="cursor-pointer"
+            onClick={() => runAction("save", onSave)}
+          >
+            {saving || activeAction === "save" ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Saving...

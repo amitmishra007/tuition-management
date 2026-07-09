@@ -25,8 +25,6 @@ import { startTransition } from "react";
 
 interface StudentTableProps {
   students: Student[];
-
-  onAddStudent?: () => void;
   onView?: (student: Student) => void;
   onEdit?: (student: Student) => void;
   onDelete?: (student: Student) => void;
@@ -60,7 +58,6 @@ const fullName = (student: Student) => {
 
 export default function StudentTable({
   students,
-  onAddStudent,
   // onEdit,
   onDelete,
   onRecordFee,
@@ -122,6 +119,10 @@ export default function StudentTable({
     });
   };
 
+  const handleAddStudent = () => {
+    router.push("/features/students/add");
+  };
+
   return (
     <div className="space-y-6">
       <Card className="rounded-3xl">
@@ -135,7 +136,7 @@ export default function StudentTable({
               </p>
             </div>
 
-            <Button size="lg" onClick={onAddStudent}>
+            <Button size="lg" onClick={handleAddStudent} className="rounded-xl">
               <Plus className="mr-2 h-4 w-4" />
               Add Student
             </Button>

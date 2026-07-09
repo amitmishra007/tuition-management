@@ -139,9 +139,25 @@ export default function Sidebar({
       {/* Desktop */}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 hidden overflow-hidden border-r bg-white transition-all duration-300 lg:block ${
-          collapsed ? "w-20" : "w-72"
-        }`}
+        className={`
+    fixed
+    left-0
+    bottom-0
+    top-20
+    z-40
+
+    hidden
+    overflow-hidden
+    border-r
+    bg-white
+
+    transition-all
+    duration-300
+
+    lg:block
+
+    ${collapsed ? "w-20" : "w-72"}
+  `}
       >
         <SidebarContent collapsed={collapsed} />
       </aside>
@@ -151,7 +167,12 @@ export default function Sidebar({
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="h-screen w-72 p-0"
+          className="
+    top-20
+    h-[calc(100vh-80px)]
+    w-72
+    p-0
+  "
           showCloseButton={false}
         >
           <SidebarContent

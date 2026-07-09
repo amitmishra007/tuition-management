@@ -1,11 +1,35 @@
-export default function DashboardPage() {
-  return (
-    <div className="rounded-2xl border bg-white p-8 shadow-sm">
-      <h2 className="text-2xl font-bold">Dashboard</h2>
+import QuickActions from "./components/QuickActions";
+import DashboardStats from "./components/DashboardStats";
+import DashboardSnapshot from "./components/DashboardSnapshot";
 
-      <p className="mt-2 text-muted-foreground">
-        Welcome to your Tuition Management System.
-      </p>
+import { getDashboardData } from "./lib/dashboardService";
+import { getDashboardUser } from "./lib/userService";
+
+export default async function DashboardPage() {
+  const [dashboard] = await Promise.all([
+    getDashboardData(),
+    getDashboardUser(),
+  ]);
+
+  return (
+    <div className="space-y-8">
+      <DashboardSnapshot
+        attendanceRecorded={dashboard.attendance.recorded}
+        present={dashboard.attendance.present}
+        total={dashboard.attendance.total}
+        pendingFees={dashboard.fees.pendingStudents}
+        birthdays={dashboard.birthdaysToday}
+        consecutiveAbsentees={dashboard.consecutiveAbsentees}
+      />
+
+      <QuickActions />
+
+      <DashboardStats
+        totalStudents={dashboard.totalStudents}
+        presentToday={dashboard.attendance.present}
+        pendingFees={dashboard.fees.pendingStudents}
+        dueThisMonth={dashboard.fees.dueThisMonth}
+      />
     </div>
   );
 }
