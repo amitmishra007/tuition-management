@@ -1,17 +1,24 @@
-("use server");
-import { supabase } from "@/lib/supabase/client";
-import type { Student } from "./types/student";
+"use server";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
+import type { Student } from "./types/student";
+
 export async function updateStudent(id: string, values: Omit<Student, "id">) {
+  const supabase = await createClient();
+
   const { error } = await supabase.from("students").update(values).eq("id", id);
 
   if (error) {
+    console.error("Update student error:", error);
     throw new Error(error.message);
   }
+
+  revalidatePath("/features/students");
+  revalidatePath(`/features/students/${id}`);
 }
 
 export async function createStudent(
@@ -26,11 +33,11 @@ export async function createStudent(
     .single();
 
   if (error) {
-    console.error(error);
+    console.error("Create student error:", error);
     throw new Error(error.message);
   }
 
-  revalidatePath("/students");
+  revalidatePath("/features/students");
 
-  redirect(`/students/${data.id}`);
+  redirect(`/features/students/${data.id}`);
 }
