@@ -10,6 +10,8 @@ import {
   BarChart3,
   Settings,
   GraduationCap,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -63,72 +65,169 @@ function SidebarContent({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      {/* Logo */}
+    <div className="relative flex h-full flex-col overflow-hidden">
+      {/* Background */}
 
-      <div
-        className={`flex h-20 shrink-0 items-center border-b ${
-          collapsed ? "justify-center px-0" : "gap-3 px-6"
-        }`}
-      >
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
-          <GraduationCap size={28} />
-        </div>
+      <div className="absolute inset-0 rounded-[30px] bg-white/80 backdrop-blur-2xl" />
 
-        {!collapsed && (
-          <div>
-            <h1 className="text-lg font-bold">Chandni Tuition</h1>
-            <p className="text-sm text-slate-500">Student Management</p>
+      {/* Soft Glow */}
+
+      <div className="pointer-events-none absolute inset-0 rounded-[30px] bg-linear-to-b from-sky-50/60 via-white/10 to-purple-50/40" />
+
+      {/* Accent */}
+
+      <div className="absolute left-0 top-0 h-full w-1 bg-linear-to-b from-sky-500 via-indigo-500 to-purple-600" />
+
+      <div className="relative flex h-full flex-col">
+        {/* ================= LOGO ================= */}
+        <div
+          className={`border-b border-white/60 transition-all duration-500 ${
+            collapsed ? "flex justify-center px-0 py-6" : "px-6 py-7"
+          }`}
+        >
+          <div
+            className={`flex items-center ${
+              collapsed ? "justify-center" : "gap-4"
+            }`}
+          >
+            <div
+              className="
+                group
+                relative
+                flex
+                h-14
+                w-14
+                items-center
+                justify-center
+                rounded-2xl
+                bg-linear-to-br
+                from-sky-500
+                via-indigo-500
+                to-purple-600
+                text-white
+                shadow-lg
+                transition-all
+                duration-500
+                hover:scale-105
+                hover:rotate-3
+              "
+            >
+              <GraduationCap className="h-7 w-7 transition-transform duration-500 group-hover:scale-110" />
+
+              <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            </div>
+
+            <div
+              className={`overflow-hidden transition-all duration-500 ${
+                collapsed ? "w-0 opacity-0" : "w-45 opacity-100"
+              }`}
+            >
+              <h2 className="bg-linear-to-r from-sky-600 via-indigo-600 to-purple-600 bg-clip-text text-lg font-bold text-transparent">
+                Chandni Tuition
+              </h2>
+
+              <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                <Sparkles className="h-3 w-3 text-sky-500" />
+                Student Management
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+        {/* ================= NAVIGATION ================= */}
+        <nav className="flex-1 overflow-y-auto px-3 py-5">
+          <ul className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+
+              const active =
+                pathname === item.href || pathname.startsWith(item.href + "/");
+
+              return (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    title={collapsed ? item.title : undefined}
+                    className={`
+                      group
+                      relative
+                      flex
+                      items-center
+                      overflow-hidden
+                      rounded-2xl
+                      transition-all
+                      duration-300
+                      ease-[cubic-bezier(.22,1,.36,1)]
+                      ${
+                        collapsed
+                          ? "justify-center px-0 py-4"
+                          : "gap-4 px-4 py-4"
+                      }
+                      ${
+                        active
+                          ? "bg-linear-to-r from-sky-500 via-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20"
+                          : "text-slate-700 hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+                      }
+                    `}
+                  >
+                    {/* Hover Glow */}
+
+                    {!active && (
+                      <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <div className="absolute inset-0 bg-linear-to-r from-sky-50 via-indigo-50 to-purple-50" />
+                      </div>
+                    )}
+
+                    <Icon
+                      className={`
+                        relative
+                        z-10
+                        h-5
+                        w-5
+                        shrink-0
+                        transition-all
+                        duration-300
+                        ${
+                          active
+                            ? "scale-110"
+                            : "group-hover:scale-110 group-hover:rotate-6"
+                        }
+                      `}
+                    />
+
+                    {!collapsed && (
+                      <>
+                        <span className="relative z-10 flex-1 font-medium">
+                          {item.title}
+                        </span>
+
+                        <ChevronRight
+                          className={`
+                            relative
+                            z-10
+                            h-4
+                            w-4
+                            transition-all
+                            duration-300
+                            ${
+                              active
+                                ? "translate-x-0 opacity-100"
+                                : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+                            }
+                          `}
+                        />
+                      </>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </div>
-
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
-        <ul className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-
-            const active =
-              pathname === item.href || pathname.startsWith(item.href + "/");
-
-            return (
-              <li key={item.title}>
-                <Link
-                  href={item.href}
-                  onClick={onNavigate}
-                  title={collapsed ? item.title : undefined}
-                  className={`flex items-center rounded-xl py-3 transition-all ${
-                    collapsed ? "justify-center px-0" : "gap-3 px-4"
-                  } ${
-                    active
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-                >
-                  <Icon className="h-5 w-5 shrink-0" />
-
-                  {!collapsed && (
-                    <span className="font-medium">{item.title}</span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {!collapsed && (
-        <div className="border-t p-4">
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-sm font-semibold">Tuition Management System</p>
-            <p className="mt-1 text-xs text-slate-500">Version 1.0</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-
 export default function Sidebar({
   collapsed,
   mobileOpen,
@@ -136,49 +235,76 @@ export default function Sidebar({
 }: SidebarProps) {
   return (
     <>
-      {/* Desktop */}
+      {/* ================= Desktop ================= */}
 
       <aside
         className={`
-    fixed
-    left-0
-    bottom-0
-    top-20
-    z-40
-
-    hidden
-    overflow-hidden
-    border-r
-    bg-white
-
-    transition-all
-    duration-300
-
-    lg:block
-
-    ${collapsed ? "w-20" : "w-72"}
-  `}
+          fixed
+          left-4
+          top-28
+          bottom-4
+          z-40
+          hidden
+          transition-all
+          duration-500
+          ease-[cubic-bezier(.22,1,.36,1)]
+          lg:block
+          ${collapsed ? "w-24" : "w-66"}
+        `}
       >
-        <SidebarContent collapsed={collapsed} />
+        <div
+          className="
+            relative
+            h-full
+            overflow-hidden
+            rounded-[30px]
+            border
+            border-white/70
+            bg-white/80
+            backdrop-blur-2xl
+            shadow-[0_20px_60px_rgba(15,23,42,0.10)]
+          "
+        >
+          <SidebarContent collapsed={collapsed} />
+        </div>
       </aside>
 
-      {/* Mobile */}
+      {/* ================= Mobile ================= */}
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className="
-    top-20
-    h-[calc(100vh-80px)]
-    w-72
-    p-0
-  "
           showCloseButton={false}
+          className="
+            top-24
+            left-4
+            h-[calc(100vh-7.5rem)]
+            w-[320px]
+            rounded-[30px]
+            border
+            border-white/70
+            bg-transparent
+            p-0
+            shadow-none
+          "
         >
-          <SidebarContent
-            collapsed={false}
-            onNavigate={() => setMobileOpen(false)}
-          />
+          <div
+            className="
+              h-full
+              overflow-hidden
+              rounded-[30px]
+              border
+              border-white/70
+              bg-white/80
+              backdrop-blur-2xl
+              shadow-[0_20px_60px_rgba(15,23,42,0.15)]
+            "
+          >
+            <SidebarContent
+              collapsed={false}
+              onNavigate={() => setMobileOpen(false)}
+            />
+          </div>
         </SheetContent>
       </Sheet>
     </>
