@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import {
   ArrowLeft,
@@ -44,14 +46,45 @@ interface Props {
 }
 
 export default function StudentEditForm({ student, mode = "edit" }: Props) {
+  const router = useRouter();
+
+  const requiredFields: (keyof Student)[] = [
+    "firstName",
+    "lastName",
+    "gender",
+    "status",
+    "dob",
+    "joiningDate",
+    "fatherName",
+    "motherName",
+    "phone",
+    "email",
+    "admissionNo",
+    "studentClass",
+    "school",
+    "monthlyFee",
+    "feeStatus",
+    "lastFeePaid",
+    "nextDueDate",
+    "address",
+    "city",
+    "state",
+    "pincode",
+  ];
   const [profileUrl, setProfileUrl] = useState(student.profilePhoto ?? "");
 
   const [profilePreview, setProfilePreview] = useState(
     student.profilePhoto ?? "/images/default-avatar.png",
   );
   const [uploading, setUploading] = useState(false);
-  const { register, handleSubmit, control } = useForm<Student>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<Student>({
     defaultValues: student,
+    shouldFocusError: true,
   });
 
   const firstName = useWatch({
@@ -72,6 +105,20 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (values: Student) => {
+    for (const field of requiredFields) {
+      const value = values[field];
+
+      if (
+        value === undefined ||
+        value === null ||
+        value === "" ||
+        (typeof value === "number" && Number.isNaN(value))
+      ) {
+        toast.error("Please fill all the required fields.");
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -82,8 +129,18 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
 
       if (mode === "edit") {
         await updateStudent(student.id, finalData);
+
+        toast.success(
+          `Details of ${finalData.firstName} ${finalData.lastName} ${
+            finalData.gender === "Male"
+              ? "S/o"
+              : finalData.gender === "Female"
+                ? "D/o"
+                : "Child of"
+          } Sh. ${finalData.fatherName} & Smt. ${finalData.motherName} updated successfully.`,
+        );
       } else {
-        const newStudent = {
+        const created = await createStudent({
           admissionNo: finalData.admissionNo,
           firstName: finalData.firstName,
           lastName: finalData.lastName,
@@ -109,12 +166,19 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
           profilePhoto: finalData.profilePhoto,
           remarks: finalData.remarks,
           status: finalData.status,
-        };
+        });
 
-        await createStudent(newStudent);
+        toast.success(
+          `${finalData.firstName} ${finalData.lastName} ${
+            finalData.gender === "Male" ? "S/o" : "D/o"
+          } Sh. ${finalData.fatherName} & Smt. ${finalData.motherName} added successfully`,
+        );
+
+        router.push(`/features/students/${created.id}`);
       }
     } catch (err) {
       console.error(err);
+      toast.error("Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -178,7 +242,13 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
         </div>
 
         <div className="flex gap-3">
-          <Link href={`/students/${student.id}`}>
+          <Link
+            href={
+              mode === "edit"
+                ? `/features/students/${student.id}/edit`
+                : "/features/students"
+            }
+          >
             <Button variant="outline">
               <X className="mr-2 h-4 w-4" />
               Cancel
@@ -302,13 +372,49 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="min-w-0">
-              <Label>First Name</Label>
-              <Input {...register("firstName")} className="mt-2 w-full" />
+              <Label>
+                First Name <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                className={`mt-2 w-full ${
+                  errors.firstName
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("firstName", {
+                  required: "First Name is required",
+                })}
+              />
+
+              {errors.firstName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.firstName.message}
+                </p>
+              )}
             </div>
 
             <div className="min-w-0">
-              <Label>Last Name</Label>
-              <Input {...register("lastName")} className="mt-2 w-full" />
+              <Label>
+                Last Name <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                className={`mt-2 w-full ${
+                  errors.lastName
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("lastName", {
+                  required: "Last Name is required",
+                })}
+              />
+
+              {errors.lastName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.lastName.message}
+                </p>
+              )}
             </div>
 
             <div className="min-w-0">
@@ -320,41 +426,52 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
               <Controller
                 control={control}
                 name="gender"
+                rules={{
+                  required: "Gender is required",
+                }}
                 render={({ field }) => (
-                  <RadioGroup
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    className="flex flex-wrap gap-4"
-                  >
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="Male" id="male" />
-                      <Label
-                        htmlFor="male"
-                        className="flex cursor-pointer items-center gap-1"
-                      >
-                        <Mars className="h-4 w-4 text-blue-600" />
-                        Male
-                      </Label>
-                    </div>
+                  <>
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      className={`flex flex-wrap gap-4 rounded-xl p-3 ${
+                        errors.gender ? "border border-red-500" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="Male" id="male" />
+                        <Label
+                          htmlFor="male"
+                          className="flex cursor-pointer items-center gap-1"
+                        >
+                          <Mars className="h-4 w-4 text-blue-600" />
+                          Male
+                        </Label>
+                      </div>
 
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="Female" id="female" />
-                      <Label
-                        htmlFor="female"
-                        className="flex cursor-pointer items-center gap-1"
-                      >
-                        <Venus className="h-4 w-4 text-pink-600" />
-                        Female
-                      </Label>
-                    </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="Female" id="female" />
+                        <Label
+                          htmlFor="female"
+                          className="flex cursor-pointer items-center gap-1"
+                        >
+                          <Venus className="h-4 w-4 text-pink-600" />
+                          Female
+                        </Label>
+                      </div>
 
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="Other" id="other" />
-                      <Label htmlFor="other" className="cursor-pointer">
-                        Other
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="Other" id="other" />
+                        <Label htmlFor="other">Other</Label>
+                      </div>
+                    </RadioGroup>
+
+                    {errors.gender && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.gender.message}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -365,20 +482,37 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
               <Controller
                 control={control}
                 name="status"
+                rules={{
+                  required: "Status is required",
+                }}
                 render={({ field }) => (
-                  <Select
-                    value={field.value ?? ""}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger className="mt-2 w-full">
-                      <SelectValue placeholder="Select Status" />
-                    </SelectTrigger>
+                  <>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger
+                        className={`mt-2 w-full ${
+                          errors.status
+                            ? "border-red-500 focus:ring-red-500"
+                            : ""
+                        }`}
+                      >
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
 
-                    <SelectContent>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="Inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        <SelectItem value="Active">Active</SelectItem>
+                        <SelectItem value="Inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {errors.status && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.status.message}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -389,30 +523,59 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
               <Controller
                 control={control}
                 name="dob"
+                rules={{
+                  required: "Date of Birth is required",
+                }}
                 render={({ field }) => (
-                  <Input
-                    type="date"
-                    value={field.value ? field.value.slice(0, 10) : ""}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className="mt-2 w-full"
-                  />
+                  <>
+                    <Input
+                      type="date"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      className={`mt-2 w-full ${
+                        errors.dob
+                          ? "border-red-500 focus-visible:ring-red-500"
+                          : ""
+                      }`}
+                    />
+
+                    {errors.dob && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.dob.message}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
 
             <div className="min-w-0">
               <Label>Joining Date</Label>
-
               <Controller
                 control={control}
                 name="joiningDate"
+                rules={{
+                  required: "Joining Date is required",
+                }}
                 render={({ field }) => (
-                  <Input
-                    type="date"
-                    value={field.value ? field.value.slice(0, 10) : ""}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className="mt-2 w-full"
-                  />
+                  <>
+                    <Input
+                      type="date"
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      className={`mt-2 w-full ${
+                        errors.joiningDate
+                          ? "border-red-500 focus-visible:ring-red-500"
+                          : ""
+                      }`}
+                    />
+
+                    {errors.joiningDate && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.joiningDate.message}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
@@ -429,32 +592,130 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
 
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <Label>Father&apos;s Name</Label>
-              <Input className="mt-2" {...register("fatherName")} />
+              <Label>
+                Father&apos;s Name <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                className={`mt-2 ${
+                  errors.fatherName
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("fatherName", {
+                  required: "Father's Name is required",
+                })}
+              />
+
+              {errors.fatherName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.fatherName.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label>Mother&apos;s Name</Label>
-              <Input className="mt-2" {...register("motherName")} />
+              <Label>
+                Mother&apos;s Name <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                className={`mt-2 ${
+                  errors.motherName
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("motherName", {
+                  required: "Mother's Name is required",
+                })}
+              />
+
+              {errors.motherName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.motherName.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label>Phone Number</Label>
-              <Input type="tel" className="mt-2" {...register("phone")} />
+              <Label>
+                Phone Number <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                type="tel"
+                className={`mt-2 ${
+                  errors.phone
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("phone", {
+                  required: "Phone Number is required",
+                  pattern: {
+                    value: /^[0-9]{10}$/,
+                    message: "Phone Number must be exactly 10 digits",
+                  },
+                })}
+              />
+
+              {errors.phone && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.phone.message}
+                </p>
+              )}
             </div>
 
             <div>
               <Label>Alternate Phone</Label>
+
               <Input
                 type="tel"
-                className="mt-2"
-                {...register("alternatePhone")}
+                className={`mt-2 ${
+                  errors.alternatePhone
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("alternatePhone", {
+                  pattern: {
+                    value: /^$|^[0-9]{10}$/,
+                    message: "Alternate Phone must be exactly 10 digits",
+                  },
+                })}
               />
+
+              {errors.alternatePhone && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.alternatePhone.message}
+                </p>
+              )}
             </div>
 
             <div className="md:col-span-2">
-              <Label>Email Address</Label>
-              <Input type="email" className="mt-2" {...register("email")} />
+              <Label>
+                Email Address <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                type="email"
+                className={`mt-2 ${
+                  errors.email
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("email", {
+                  required: "Email Address is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Enter a valid email address",
+                  },
+                })}
+              />
+
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -467,21 +728,81 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
             Academic Details
           </h2>
 
+          {/* Admission Number */}
           <div className="grid gap-6 md:grid-cols-2">
+            {/* Admission Number */}
             <div>
-              <Label>Admission Number</Label>
-              <Input className="mt-2" {...register("admissionNo")} />
+              <Label>
+                Admission Number <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                className={`mt-2 ${
+                  errors.admissionNo
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("admissionNo", {
+                  required: "Admission Number is required",
+                })}
+              />
+
+              {errors.admissionNo && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.admissionNo.message}
+                </p>
+              )}
             </div>
 
+            {/* Class */}
             <div>
-              <Label>Class</Label>
-              <Input className="mt-2" {...register("studentClass")} />
+              <Label>
+                Class <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                className={`mt-2 ${
+                  errors.studentClass
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("studentClass", {
+                  required: "Class is required",
+                })}
+              />
+
+              {errors.studentClass && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.studentClass.message}
+                </p>
+              )}
             </div>
 
+            {/* School */}
             <div className="md:col-span-2">
-              <Label>School Name</Label>
-              <Input className="mt-2" {...register("school")} />
+              <Label>
+                School Name <span className="text-red-500">*</span>
+              </Label>
+
+              <Input
+                className={`mt-2 ${
+                  errors.school
+                    ? "border-red-500 focus-visible:ring-red-500"
+                    : ""
+                }`}
+                {...register("school", {
+                  required: "School Name is required",
+                })}
+              />
+
+              {errors.school && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.school.message}
+                </p>
+              )}
             </div>
+
+            {/* Batch (Optional) */}
 
             <div className="md:col-span-2">
               <Label>Batch</Label>
@@ -491,11 +812,11 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
                 name="batch"
                 render={({ field }) => (
                   <Select
-                    value={field.value ?? undefined}
-                    onValueChange={field.onChange}
+                    value={field.value ?? ""}
+                    onValueChange={(value) => field.onChange(value)}
                   >
                     <SelectTrigger className="mt-2">
-                      <SelectValue />
+                      <SelectValue placeholder="Select Batch (Optional)" />
                     </SelectTrigger>
 
                     <SelectContent>
@@ -652,7 +973,13 @@ export default function StudentEditForm({ student, mode = "edit" }: Props) {
       </Card>
       {/* Footer Buttons */}
       <div className="flex flex-col-reverse gap-4 sm:flex-row sm:justify-end">
-        <Link href={`/students/${student.id}`}>
+        <Link
+          href={
+            mode === "edit"
+              ? `/features/students/${student.id}/edit`
+              : "/features/students"
+          }
+        >
           <Button variant="outline" size="lg">
             <X className="mr-2 h-4 w-4" />
             Cancel
