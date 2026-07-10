@@ -160,6 +160,7 @@ export default function DashboardShell({
           <Topbar
             username={username}
             collapsed={collapsed}
+            avatarUrl={"/chandnitiwarimishra.png"}
             setCollapsed={setCollapsed}
             setMobileOpen={setMobileOpen}
           />

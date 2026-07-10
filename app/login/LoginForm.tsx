@@ -1,17 +1,17 @@
 "use client";
-import { motion, Variants } from "framer-motion";
+
+import { AnimatePresence, motion, Variants } from "framer-motion";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
+  AlertCircle,
   Eye,
   EyeOff,
   Loader2,
   LockKeyhole,
+  LogIn,
   User,
   X,
-  LogIn,
-  CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,7 +49,7 @@ const item: Variants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.6,
-      ease: "easeOut",
+      ease: [0.22, 1, 0.36, 1],
     },
   },
 };
@@ -57,38 +57,75 @@ const item: Variants = {
 function SubmitButton() {
   const { pending } = useFormStatus();
 
-  const loadingToastId = useRef<string | number | null>(null);
+  const loadingToast = useRef<string | number | null>(null);
 
   useEffect(() => {
-    if (pending) {
-      loadingToastId.current = toast.loading("Signing you in...", {
-        description: "Please wait while we verify your credentials.",
+    if (pending && !loadingToast.current) {
+      loadingToast.current = toast.loading("Signing you in...", {
+        description: "Verifying your credentials...",
         icon: <Loader2 className="h-4 w-4 animate-spin" />,
       });
-    } else if (loadingToastId.current) {
-      toast.dismiss(loadingToastId.current);
-      loadingToastId.current = null;
+    }
+
+    if (!pending && loadingToast.current) {
+      toast.dismiss(loadingToast.current);
+      loadingToast.current = null;
     }
   }, [pending]);
 
   return (
-    <Button
-      type="submit"
-      disabled={pending}
-      className="h-12 w-full cursor-pointer rounded-2xl bg-linear-to-r from-sky-500 via-sky-600 to-blue-600 text-base font-semibold text-white shadow-lg shadow-sky-300/40 transition-all duration-300 hover:scale-[1.02] hover:from-sky-600 hover:to-blue-700 hover:shadow-xl hover:shadow-sky-400/40 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+    <motion.div
+      whileHover={{
+        scale: 1.015,
+      }}
+      whileTap={{
+        scale: 0.985,
+      }}
     >
-      {pending ? (
-        <>
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          Signing In...
-        </>
-      ) : (
-        <>
-          <LogIn className="mr-2 h-5 w-5" />
-          Sign In
-        </>
-      )}
-    </Button>
+      <Button
+        type="submit"
+        disabled={pending}
+        className="
+          h-12
+          w-full
+          cursor-pointer
+          rounded-2xl
+
+          bg-linear-to-r
+          from-sky-500
+          via-sky-600
+          to-blue-600
+
+          text-base
+          font-semibold
+          text-white
+
+          shadow-lg
+          shadow-sky-300/40
+
+          transition-all
+          duration-300
+
+          hover:shadow-xl
+          hover:shadow-sky-400/40
+
+          disabled:pointer-events-none
+          disabled:opacity-70
+        "
+      >
+        {pending ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Signing In...
+          </>
+        ) : (
+          <>
+            <LogIn className="mr-2 h-5 w-5" />
+            Sign In
+          </>
+        )}
+      </Button>
+    </motion.div>
   );
 }
 
@@ -98,27 +135,20 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
 
-  const lastError = useRef<string | null>(null);
+  const previousError = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!state) return;
+    if (!state.error) return;
 
-    if (state.error && state.error !== lastError.current) {
-      lastError.current = state.error;
+    if (previousError.current === state.error) return;
 
-      toast.error("Sign in failed", {
-        description: state.error,
-        icon: <AlertCircle className="h-5 w-5 text-red-500" />,
-      });
-    }
+    previousError.current = state.error;
 
-    if (state.success) {
-      toast.success("Welcome back!", {
-        description: "Login successful.",
-        icon: <CheckCircle2 className="h-5 w-5 text-green-600" />,
-      });
-    }
-  }, [state]);
+    toast.error("Sign in failed", {
+      description: state.error,
+      icon: <AlertCircle className="h-5 w-5 text-red-500" />,
+    });
+  }, [state.error]);
 
   return (
     <motion.div
@@ -139,8 +169,24 @@ export default function LoginForm() {
         ease: [0.22, 1, 0.36, 1],
       }}
     >
-      <Card className="overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl">
-        <CardContent className="space-y-1 p-9 md:p-10">
+      <Card
+        className="
+          relative
+          overflow-hidden
+          rounded-[28px]
+
+          border
+          border-slate-200/70
+
+          bg-white/90
+          backdrop-blur-2xl
+
+          shadow-[0_20px_60px_rgba(15,23,42,0.08)]
+        "
+      >
+        <div className="absolute inset-0 bg-linear-to-br from-sky-50/40 via-transparent to-blue-50/40 pointer-events-none" />
+
+        <CardContent className="relative p-9 md:p-10">
           <motion.form
             action={formAction}
             variants={container}
@@ -148,8 +194,6 @@ export default function LoginForm() {
             animate="visible"
             className="space-y-7"
           >
-            {/* Username */}
-
             <motion.div variants={item} className="space-y-3">
               <label
                 htmlFor="username"
@@ -172,18 +216,71 @@ export default function LoginForm() {
                     setUsername(e.target.value.replace(/\s/g, ""))
                   }
                   placeholder="Enter username"
-                  className="h-13 rounded-2xl border-slate-200 bg-slate-50/70 pl-12 pr-12 text-[15px] shadow-sm transition-all duration-200 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                  className="
+                    h-13
+                    rounded-2xl
+
+                    border-slate-200
+                    bg-slate-50/70
+
+                    pl-12
+                    pr-12
+
+                    text-[15px]
+
+                    shadow-sm
+
+                    transition-all
+                    duration-300
+
+                    focus:border-sky-400
+                    focus:bg-white
+                    focus:ring-4
+                    focus:ring-sky-100
+                  "
                 />
 
-                {username.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setUsername("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-500 transition hover:bg-slate-100"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                <AnimatePresence>
+                  {username.length > 0 && (
+                    <motion.button
+                      initial={{
+                        scale: 0,
+                        rotate: -90,
+                      }}
+                      animate={{
+                        scale: 1,
+                        rotate: 0,
+                      }}
+                      exit={{
+                        scale: 0,
+                        rotate: 90,
+                      }}
+                      transition={{
+                        duration: 0.2,
+                      }}
+                      type="button"
+                      onClick={() => setUsername("")}
+                      className="
+                        absolute
+                        right-3
+                        top-1/2
+
+                        -translate-y-1/2
+
+                        rounded-full
+                        p-1.5
+
+                        text-slate-500
+
+                        transition-colors
+
+                        hover:bg-slate-200
+                      "
+                    >
+                      <X className="h-4 w-4" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
 
@@ -206,33 +303,94 @@ export default function LoginForm() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="Enter password"
-                  className="h-13 rounded-2xl border-slate-200 bg-slate-50/70 pl-12 pr-12 text-[15px] shadow-sm transition-all duration-200 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100"
+                  className="
+                    h-13
+                    rounded-2xl
+
+                    border-slate-200
+                    bg-slate-50/70
+
+                    pl-12
+                    pr-12
+
+                    text-[15px]
+
+                    shadow-sm
+
+                    transition-all
+                    duration-300
+
+                    focus:border-sky-400
+                    focus:bg-white
+                    focus:ring-4
+                    focus:ring-sky-100
+                  "
                 />
 
-                <button
+                <motion.button
+                  whileHover={{
+                    scale: 1.08,
+                  }}
+                  whileTap={{
+                    scale: 0.9,
+                  }}
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer rounded-full p-2 text-slate-500 transition-all hover:bg-slate-200 active:scale-95"
+                  className="
+                    absolute
+                    right-3
+                    top-1/2
+
+                    -translate-y-1/2
+
+                    rounded-full
+                    p-2
+
+                    text-slate-500
+
+                    transition-colors
+
+                    hover:bg-slate-200
+                  "
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5" />
                   ) : (
                     <Eye className="h-5 w-5" />
                   )}
-                </button>
+                </motion.button>
               </div>
             </motion.div>
 
+            {/* Submit */}
+
             <motion.div
               variants={item}
-              whileHover={{
-                scale: 1.02,
-              }}
-              whileTap={{
-                scale: 0.98,
+              transition={{
+                delay: 0.15,
               }}
             >
               <SubmitButton />
+            </motion.div>
+
+            {/* Footer */}
+
+            <motion.div
+              variants={item}
+              className="
+                flex
+                items-center
+                justify-center
+                pt-2
+              "
+            >
+              <p className="text-center text-xs leading-relaxed text-slate-500">
+                Protected access for{" "}
+                <span className="font-semibold text-slate-700">
+                  Chandni Tuition
+                </span>{" "}
+                administrators.
+              </p>
             </motion.div>
           </motion.form>
         </CardContent>

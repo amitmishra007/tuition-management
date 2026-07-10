@@ -622,12 +622,6 @@ export default function StudentTable({
                           Permanently delete this student?
                         </h3>
 
-                        <p className="text-sm leading-6 text-slate-600">
-                          This will permanently remove the student&apos;s
-                          profile, attendance records and every other record
-                          associated with this student.
-                        </p>
-
                         <p className="text-sm font-medium text-red-600">
                           This action cannot be undone.
                         </p>
