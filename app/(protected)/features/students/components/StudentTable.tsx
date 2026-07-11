@@ -703,26 +703,17 @@ export default function StudentTable({
                             layoutId={`card-${student.id}`}
                             className="flex items-center gap-4"
                           >
-                            <motion.div
-                              layoutId={`avatar-${student.id}`}
-                              whileHover={
-                                prefersReducedMotion
-                                  ? undefined
-                                  : { scale: 1.04 }
-                              }
-                              transition={springGentle}
-                            >
-                              <Avatar className="h-12 w-12 border-2 border-white shadow-lg">
+                            <div>
+                              <Avatar className="h-16 w-16 border-2 border-white shadow-xl">
                                 <AvatarImage
-                                  key={`${student.id}-${student.profilePhoto}`}
                                   src={student.profilePhoto || ""}
                                   alt={fullName(student)}
                                 />
-                                <AvatarFallback className="bg-slate-100 text-slate-700">
+                                <AvatarFallback>
                                   {initials(student)}
                                 </AvatarFallback>
                               </Avatar>
-                            </motion.div>
+                            </div>
 
                             <div className="min-w-0">
                               <p className="font-semibold tracking-[-0.02em] text-slate-900">
