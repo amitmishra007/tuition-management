@@ -64,10 +64,10 @@ export default function Topbar({
   const greeting = useMemo(() => {
     const hour = time.getHours();
 
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
+    if (hour < 12) return "Morning";
+    if (hour < 17) return "Afternoon";
 
-    return "Good Evening";
+    return "Evening";
   }, [time]);
 
   const displayName = useMemo(() => {
@@ -150,7 +150,7 @@ export default function Topbar({
             </Button>
 
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+              <div className="inline-flex items-center gap-0.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
                 <Sparkles className="h-3.5 w-3.5" />
                 {greeting}
               </div>

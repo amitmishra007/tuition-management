@@ -18,8 +18,11 @@ export default async function DashboardPage() {
         present={dashboard.attendance.present}
         total={dashboard.attendance.total}
         pendingFees={dashboard.fees.pendingStudents}
-        birthdays={dashboard.birthdaysToday}
-        consecutiveAbsentees={dashboard.consecutiveAbsentees}
+        birthdays={dashboard.birthdays.total}
+        consecutiveAbsentees={dashboard.absentees.total}
+        feeStudents={dashboard.fees.students}
+        birthdayStudents={dashboard.birthdays.students}
+        absenteeStudents={dashboard.absentees.students}
       />
 
       <QuickActions />
