@@ -374,17 +374,6 @@ export default function StudentTable({
                     <Sparkles className="h-3.5 w-3.5" />
                     Student Registry
                   </motion.div>
-
-                  <div>
-                    <h1 className="text-3xl font-semibold tracking-[-0.04em] text-slate-900 lg:text-4xl">
-                      Students
-                    </h1>
-                    <p className="mt-2 text-sm text-slate-600 lg:text-base">
-                      A cinematic overview of every student, with faster
-                      actions, richer hierarchy, and premium interaction
-                      feedback.
-                    </p>
-                  </div>
                 </div>
 
                 <motion.div
