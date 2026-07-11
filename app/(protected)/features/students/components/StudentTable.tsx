@@ -713,7 +713,11 @@ export default function StudentTable({
                               transition={springGentle}
                             >
                               <Avatar className="h-12 w-12 border-2 border-white shadow-lg">
-                                <AvatarImage src={student.profilePhoto || ""} />
+                                <AvatarImage
+                                  key={`${student.id}-${student.profilePhoto}`}
+                                  src={student.profilePhoto || ""}
+                                  alt={fullName(student)}
+                                />
                                 <AvatarFallback className="bg-slate-100 text-slate-700">
                                   {initials(student)}
                                 </AvatarFallback>
