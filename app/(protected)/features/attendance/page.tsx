@@ -291,6 +291,7 @@ export default function AttendancePage() {
           }}
         />
       )}
+
       <HolidayDialog
         open={holidayDialogOpen}
         date={date}

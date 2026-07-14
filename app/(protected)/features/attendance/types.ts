@@ -27,3 +27,25 @@ export type AttendanceSheetRow = {
   status: AttendanceStatus;
   attendanceId: string | null;
 };
+
+export type CalendarDayStatus = "Present" | "Absent" | "Holiday" | "Pending";
+
+export interface AttendanceCalendarDay {
+  date: string; // yyyy-MM-dd
+  status: CalendarDayStatus;
+  remarks?: string | null;
+}
+
+export interface StudentAttendanceSummary {
+  student: Student;
+
+  calendar: AttendanceCalendarDay[];
+
+  present: number;
+  absent: number;
+  holidays: number;
+
+  percentage: number;
+
+  streak: number;
+}
