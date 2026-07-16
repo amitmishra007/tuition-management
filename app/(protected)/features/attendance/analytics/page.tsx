@@ -65,7 +65,22 @@ export default function AttendancePage() {
     to: endOfMonth(new Date()),
   });
 
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+
   const currentMonth = dateRange.from;
+
+  function handleMonthChange(month: number) {
+    setSelectedMonth(month);
+
+    const year = new Date().getFullYear();
+
+    const selectedDate = new Date(year, month - 1, 1);
+
+    setDateRange({
+      from: startOfMonth(selectedDate),
+      to: endOfMonth(selectedDate),
+    });
+  }
 
   const [students, setStudents] = useState<Student[]>([]);
 
@@ -447,6 +462,8 @@ export default function AttendancePage() {
         <AttendanceFilters
           search={search}
           onSearchChange={setSearch}
+          selectedMonth={selectedMonth}
+          onMonthChange={handleMonthChange}
           dateRange={dateRange}
           onDateRangeChange={setDateRange}
           classFilter={classFilter}

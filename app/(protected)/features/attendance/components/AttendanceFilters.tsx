@@ -29,6 +29,9 @@ interface AttendanceFiltersProps {
   search: string;
   onSearchChange: (value: string) => void;
 
+  selectedMonth: number;
+  onMonthChange: (month: number) => void;
+
   dateRange: {
     from: Date;
     to: Date;
@@ -133,6 +136,9 @@ export default function AttendanceFilters({
   search,
   onSearchChange,
 
+  selectedMonth,
+  onMonthChange,
+
   dateRange,
   onDateRangeChange,
 
@@ -144,17 +150,18 @@ export default function AttendanceFilters({
 
   totalStudents,
 }: AttendanceFiltersProps) {
-  const selectedMonth = dateRange.from.getMonth();
-
   function changeMonth(value: string) {
-    const month = Number(value);
+    const monthIndex = Number(value);
 
     const year = dateRange.from.getFullYear();
 
-    onDateRangeChange({
-      from: new Date(year, month, 1),
+    const selectedDate = new Date(year, monthIndex, 1);
 
-      to: endOfMonth(new Date(year, month, 1)),
+    onMonthChange(monthIndex + 1);
+
+    onDateRangeChange({
+      from: startOfMonth(selectedDate),
+      to: endOfMonth(selectedDate),
     });
   }
 
@@ -167,9 +174,10 @@ export default function AttendanceFilters({
 
     onStatusChange("all");
 
+    onMonthChange(today.getMonth() + 1);
+
     onDateRangeChange({
       from: startOfMonth(today),
-
       to: endOfMonth(today),
     });
   }
@@ -376,7 +384,10 @@ lg:grid-cols-3
 "
           >
             <FilterField label="Quick Month View">
-              <Select value={String(selectedMonth)} onValueChange={changeMonth}>
+              <Select
+                value={String(selectedMonth - 1)}
+                onValueChange={changeMonth}
+              >
                 <SelectTrigger
                   className="
 h-14
