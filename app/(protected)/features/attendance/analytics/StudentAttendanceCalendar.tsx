@@ -118,44 +118,43 @@ export default function StudentAttendanceCalendar({ month, days }: Props) {
         duration: 0.45,
       }}
       className="
-        overflow-hidden
-        rounded-[28px]
-        border
-        border-white/60
-        bg-white/70
-        p-5
-        shadow-[0_20px_60px_rgba(15,23,42,.08)]
-        backdrop-blur-xl
-      "
+overflow-hidden
+rounded-2xl
+sm:rounded-[28px]
+border
+border-white/60
+bg-white/70
+p-3
+sm:p-5
+shadow-[0_20px_60px_rgba(15,23,42,.08)]
+backdrop-blur-xl
+"
     >
       {/* Month Header */}
 
       <div
         className="
-          mb-5
-          flex
-          items-center
-          justify-between
-        "
+mb-4
+flex
+items-start
+justify-between
+gap-3
+"
       >
         <div>
           <h3
             className="
-              text-lg
-              font-black
-              tracking-tight
-              text-slate-800
-            "
+  text-base
+  sm:text-lg
+  font-black
+  tracking-tight
+  text-slate-800
+"
           >
             {format(month, "MMMM yyyy")}
           </h3>
 
-          <p
-            className="
-              text-sm
-              text-slate-500
-            "
-          >
+          <p className="text-xs sm:text-sm text-slate-500">
             Attendance timeline
           </p>
         </div>
@@ -167,9 +166,12 @@ export default function StudentAttendanceCalendar({ month, days }: Props) {
             from-sky-100
             via-indigo-100
             to-cyan-100
-            px-4
-            py-2
-            text-xs
+           px-3
+py-1.5
+text-[10px]
+sm:px-4
+sm:py-2
+sm:text-xs
             font-bold
             text-indigo-700
           "

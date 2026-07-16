@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import type { AttendanceRow } from "../types";
+import AttendancePercentage from "./AttendaancePercentage";
 
 interface AttendanceStudentTableProps {
   rows: AttendanceRow[];
@@ -248,53 +249,9 @@ export default function AttendanceStudentTable({
 
                     {/* Percentage */}
 
-                    <td className="px-6">
-                      <div
-                        className="
-                          flex
-                          items-center
-                          justify-center
-                        "
-                      >
-                        <div
-                          className="
-                            h-3
-                            w-36
-                            overflow-hidden
-                            rounded-full
-                            bg-slate-200
-                          "
-                        >
-                          <motion.div
-                            initial={{
-                              width: 0,
-                            }}
-                            animate={{
-                              width: `${row.percentage}%`,
-                            }}
-                            transition={{
-                              duration: 0.8,
-                            }}
-                            className="
-                              h-full
-                              rounded-full
-                              bg-linear-to-r
-                              from-emerald-500
-                              via-sky-500
-                              to-indigo-500
-                            "
-                          />
-                        </div>
-
-                        <span
-                          className="
-                            ml-3
-                            font-bold
-                            text-slate-700
-                          "
-                        >
-                          {row.percentage}%
-                        </span>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <AttendancePercentage value={row.percentage} />
                       </div>
                     </td>
 
