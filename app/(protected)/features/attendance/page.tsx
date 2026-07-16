@@ -16,9 +16,13 @@ import RemoveHolidayDialog from "./components/RemoveHolidayDialog";
 import { toast } from "sonner";
 
 export default function AttendancePage() {
-  const [date, setDate] = useState(
-    () => new Date().toISOString().split("T")[0],
-  );
+  const [date, setDate] = useState(() => {
+    const now = new Date();
+
+    const offset = now.getTimezoneOffset();
+
+    return new Date(now.getTime() - offset * 60000).toISOString().split("T")[0];
+  });
   const [saving, setSaving] = useState(false);
   const [holidayDialogOpen, setHolidayDialogOpen] = useState(false);
   const [rows, setRows] = useState<AttendanceSheetRow[]>([]);

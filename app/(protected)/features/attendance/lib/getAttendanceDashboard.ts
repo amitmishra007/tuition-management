@@ -1,79 +1,74 @@
 import { supabase } from "@/lib/supabase/client";
 
-import { buildAttendanceAnalytics } from "./attendanceAnalytics";
+import type { Student } from "../../students/types/student";
 
-export interface StudentAttendanceCard {
+export interface AttendanceRecord {
   id: string;
+  student_id: string;
+  attendance_date: string;
+  status: "Present" | "Absent";
+  remarks: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-  firstName: string;
-  lastName: string;
+export interface HolidayRecord {
+  id: string;
+  date: string;
+  title: string;
+  description: string | null;
+}
 
-  studentClass: string | null;
-  batch: string | null;
-
-  profilePhoto: string | null;
-
-  analytics: ReturnType<typeof buildAttendanceAnalytics>;
+export interface AttendanceDashboardData {
+  students: Student[];
+  attendance: AttendanceRecord[];
+  holidays: HolidayRecord[];
 }
 
 export async function getAttendanceDashboard(
   year: number,
   month: number,
-): Promise<StudentAttendanceCard[]> {
+): Promise<AttendanceDashboardData> {
   const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
 
-  const monthEnd = `${year}-${String(month).padStart(2, "0")}-31`;
+  const lastDay = new Date(year, month, 0).getDate();
+
+  const monthEnd = `${year}-${String(month).padStart(2, "0")}-${String(
+    lastDay,
+  ).padStart(2, "0")}`;
 
   const [
     { data: students, error: studentError },
     { data: attendance, error: attendanceError },
     { data: holidays, error: holidayError },
   ] = await Promise.all([
-    supabase.from("students").select("*").order("firstName"),
+    supabase
+      .from("students")
+      .select("*")
+      .order("firstName", { ascending: true }),
 
     supabase
       .from("attendance")
       .select("*")
       .gte("attendance_date", monthStart)
-      .lte("attendance_date", monthEnd),
+      .lte("attendance_date", monthEnd)
+      .order("attendance_date", { ascending: true }),
 
     supabase
       .from("holidays")
       .select("*")
       .gte("date", monthStart)
-      .lte("date", monthEnd),
+      .lte("date", monthEnd)
+      .order("date", { ascending: true }),
   ]);
 
   if (studentError) throw studentError;
-
   if (attendanceError) throw attendanceError;
-
   if (holidayError) throw holidayError;
 
-  return (students ?? []).map((student) => {
-    const studentAttendance = (attendance ?? []).filter(
-      (a) => a.student_id === student.id,
-    );
-
-    return {
-      id: student.id,
-
-      firstName: student.firstName,
-
-      lastName: student.lastName,
-
-      studentClass: student.studentClass,
-
-      batch: student.batch,
-
-      profilePhoto: student.profilePhoto,
-
-      analytics: buildAttendanceAnalytics(
-        studentAttendance,
-        holidays ?? [],
-        year,
-        month,
-      ),
-    };
-  });
+  return {
+    students: (students ?? []) as Student[],
+    attendance: (attendance ?? []) as AttendanceRecord[],
+    holidays: (holidays ?? []) as HolidayRecord[],
+  };
 }

@@ -1,5 +1,5 @@
 "use client";
-
+import type { Variants } from "framer-motion";
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -20,17 +20,74 @@ interface Props {
   month: Date;
 }
 
-const COLORS = {
-  Present:
-    "bg-emerald-500 text-white shadow-emerald-500/30 hover:bg-emerald-600",
+const STATUS_STYLES = {
+  Present: `
+    bg-gradient-to-br
+    from-emerald-400
+    via-emerald-500
+    to-green-600
+    text-white
+    shadow-emerald-500/30
+  `,
 
-  Absent: "bg-rose-500 text-white shadow-rose-500/30 hover:bg-rose-600",
+  Absent: `
+    bg-gradient-to-br
+    from-rose-400
+    via-red-500
+    to-rose-700
+    text-white
+    shadow-rose-500/30
+  `,
 
-  Holiday: "bg-amber-400 text-slate-900 shadow-amber-300/40 hover:bg-amber-500",
+  Holiday: `
+    bg-gradient-to-br
+    from-amber-300
+    via-orange-400
+    to-yellow-500
+    text-slate-900
+    shadow-orange-400/30
+  `,
 
-  Pending: "bg-orange-400 text-white shadow-orange-300/40 hover:bg-orange-500",
+  Pending: `
+    bg-gradient-to-br
+    from-slate-200
+    via-slate-100
+    to-white
+    text-slate-400
+    border
+    border-slate-200
+  `,
 
-  None: "bg-slate-100 text-slate-500 hover:bg-slate-200",
+  None: `
+    bg-gradient-to-br
+    from-slate-50
+    via-white
+    to-slate-100
+    text-slate-400
+    border
+    border-slate-200/70
+  `,
+};
+
+const dayVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.7,
+    y: 10,
+  },
+
+  visible: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    y: 0,
+
+    transition: {
+      delay: i * 0.015,
+      duration: 0.3,
+      type: "spring" as const,
+      stiffness: 180,
+    },
+  }),
 };
 
 export default function StudentAttendanceCalendar({ month, days }: Props) {
@@ -45,106 +102,276 @@ export default function StudentAttendanceCalendar({ month, days }: Props) {
 
   const offset = getDay(first);
 
-  const map = new Map(days.map((d) => [d.date, d]));
+  const attendanceMap = new Map(days.map((item) => [item.date, item]));
 
   return (
-    <div className="overflow-hidden rounded-3xl border bg-white shadow-sm">
-      {/* Header */}
+    <motion.div
+      initial={{
+        opacity: 0,
+        y: 20,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.45,
+      }}
+      className="
+        overflow-hidden
+        rounded-[28px]
+        border
+        border-white/60
+        bg-white/70
+        p-5
+        shadow-[0_20px_60px_rgba(15,23,42,.08)]
+        backdrop-blur-xl
+      "
+    >
+      {/* Month Header */}
 
-      <div className="border-b bg-linear-to-r from-sky-50 via-white to-indigo-50 px-6 py-5">
-        <h3 className="text-lg font-bold">Attendance Calendar</h3>
+      <div
+        className="
+          mb-5
+          flex
+          items-center
+          justify-between
+        "
+      >
+        <div>
+          <h3
+            className="
+              text-lg
+              font-black
+              tracking-tight
+              text-slate-800
+            "
+          >
+            {format(month, "MMMM yyyy")}
+          </h3>
 
-        <p className="text-sm text-muted-foreground">
-          Daily attendance overview
-        </p>
+          <p
+            className="
+              text-sm
+              text-slate-500
+            "
+          >
+            Attendance timeline
+          </p>
+        </div>
+
+        <div
+          className="
+            rounded-full
+            bg-linear-to-r
+            from-sky-100
+            via-indigo-100
+            to-cyan-100
+            px-4
+            py-2
+            text-xs
+            font-bold
+            text-indigo-700
+          "
+        >
+          Monthly View
+        </div>
       </div>
 
-      <div className="p-5">
-        {/* Week Days */}
+      {/* Week Header */}
 
-        <div className="mb-3 grid grid-cols-7 gap-2">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-            <div
-              key={day}
-              className="text-center text-xs font-semibold uppercase tracking-wide text-slate-500"
+      <div
+        className="
+          mb-3
+          grid
+          grid-cols-7
+          gap-2
+        "
+      >
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div
+            key={day}
+            className="
+                text-center
+                text-[11px]
+                font-bold
+                uppercase
+                tracking-widest
+                text-slate-400
+              "
+          >
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* Days */}
+
+      <div
+        className="
+          grid
+          grid-cols-7
+          gap-2
+        "
+      >
+        {Array.from({
+          length: offset,
+        }).map((_, i) => (
+          <div key={`empty-${i}`} />
+        ))}
+
+        {calendarDays.map((date, index) => {
+          const key = format(date, "yyyy-MM-dd");
+
+          const item = attendanceMap.get(key);
+
+          let status: "Present" | "Absent" | "Holiday" | "Pending" | "None" =
+            "None";
+
+          if (item) {
+            status = item.status;
+          } else if (isFuture(date)) {
+            status = "Pending";
+          }
+
+          return (
+            <motion.div
+              key={key}
+              custom={index}
+              variants={dayVariants}
+              initial="hidden"
+              animate="visible"
+              whileHover={{
+                scale: 1.12,
+                y: -3,
+              }}
+              whileTap={{
+                scale: 0.95,
+              }}
+              className={clsx(
+                `
+                    relative
+                    aspect-square
+                    flex
+                    items-center
+                    justify-center
+                    rounded-xl
+                    text-xs
+                    font-black
+                    cursor-pointer
+                    shadow-lg
+                    transition-all
+                    `,
+
+                STATUS_STYLES[status],
+
+                isToday(date) &&
+                  `
+                    ring-2
+                    ring-sky-400
+                    ring-offset-2
+                    `,
+              )}
             >
-              {day}
-            </div>
-          ))}
-        </div>
+              {format(date, "d")}
 
-        {/* Calendar */}
-
-        <div className="grid grid-cols-7 gap-2">
-          {Array.from({ length: offset }).map((_, i) => (
-            <div key={i} />
-          ))}
-
-          {calendarDays.map((date) => {
-            const key = format(date, "yyyy-MM-dd");
-
-            const item = map.get(key);
-
-            let state: "Present" | "Absent" | "Holiday" | "Pending" | "None" =
-              "None";
-
-            if (item) {
-              state = item.status;
-            } else if (isFuture(date)) {
-              state = "Pending";
-            }
-
-            return (
-              <motion.div
-                key={key}
-                whileHover={{
-                  scale: 1.08,
-                  y: -2,
-                }}
-                whileTap={{
-                  scale: 0.97,
-                }}
-                transition={{
-                  duration: 0.18,
-                }}
-                className={clsx(
-                  "relative flex aspect-square cursor-pointer items-center justify-center rounded-xl text-sm font-bold shadow transition-all",
-                  COLORS[state],
-                  isToday(date) && "ring-2 ring-sky-500 ring-offset-2",
-                )}
-              >
-                {format(date, "d")}
-
-                {item?.remarks && (
-                  <span className="absolute bottom-1 right-1 h-1.5 w-1.5 rounded-full bg-white" />
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Legend */}
-
-        <div className="mt-6 flex flex-wrap gap-4">
-          <Legend color="bg-emerald-500" text="Present" />
-
-          <Legend color="bg-rose-500" text="Absent" />
-
-          <Legend color="bg-amber-400" text="Holiday" />
-
-          <Legend color="bg-orange-400" text="Pending" />
-        </div>
+              {item?.remarks && (
+                <span
+                  className="
+                          absolute
+                          right-1
+                          top-1
+                          h-1.5
+                          w-1.5
+                          rounded-full
+                          bg-white
+                          shadow
+                        "
+                />
+              )}
+            </motion.div>
+          );
+        })}
       </div>
-    </div>
+
+      {/* Legend */}
+
+      <div
+        className="
+          mt-6
+          flex
+          flex-wrap
+          gap-3
+        "
+      >
+        <Legend
+          gradient="
+          from-emerald-400
+          to-green-600"
+          text="Present"
+        />
+
+        <Legend
+          gradient="
+          from-rose-400
+          to-red-600"
+          text="Absent"
+        />
+
+        <Legend
+          gradient="
+          from-amber-300
+          to-orange-500"
+          text="Holiday"
+        />
+
+        <Legend
+          gradient="
+          from-slate-200
+          to-white"
+          text="Pending"
+        />
+      </div>
+    </motion.div>
   );
 }
 
-function Legend({ color, text }: { color: string; text: string }) {
+function Legend({ gradient, text }: { gradient: string; text: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className={clsx("h-3 w-3 rounded-full", color)} />
+    <div
+      className="
+        flex
+        items-center
+        gap-2
+        rounded-full
+        border
+        bg-white
+        px-3
+        py-1.5
+        shadow-sm
+      "
+    >
+      <span
+        className={clsx(
+          `
+          h-3
+          w-3
+          rounded-full
+          bg-linear-to-br
+          `,
+          gradient,
+        )}
+      />
 
-      <span className="text-sm text-slate-600">{text}</span>
+      <span
+        className="
+          text-xs
+          font-semibold
+          text-slate-600
+        "
+      >
+        {text}
+      </span>
     </div>
   );
 }
