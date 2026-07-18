@@ -13,6 +13,7 @@ import {
   History,
   ReceiptIndianRupee,
   Sparkles,
+  CalendarClock,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -173,89 +174,15 @@ export default function PaymentCard({
         overflow-hidden
         rounded-3xl
         border
-        border-white/10
-        bg-white/[0.035]
+       bg-white
+border-slate-200
+shadow-xl
         backdrop-blur-xl
-        shadow-[0_25px_80px_rgba(0,0,0,0.35)]
         transition-transform
         duration-500
         hover:-translate-y-1
       "
     >
-      {/* ======================================================
-          Aurora Layers
-      ======================================================= */}
-
-      <div
-        className="
-          pointer-events-none
-          absolute
-          inset-0
-          overflow-hidden
-        "
-      >
-        <motion.div
-          animate={{
-            scale: [1, 1.15, 1],
-
-            opacity: [0.35, 0.55, 0.35],
-          }}
-          transition={{
-            duration: 8,
-
-            repeat: Infinity,
-
-            ease: "easeInOut",
-          }}
-          className="
-            absolute
-            -left-24
-            -top-24
-            h-80
-            w-80
-            rounded-full
-            bg-violet-500/20
-            blur-[90px]
-          "
-        />
-
-        <motion.div
-          animate={{
-            x: [0, 80, -40, 0],
-
-            y: [0, 30, -20, 0],
-          }}
-          transition={{
-            duration: 20,
-
-            repeat: Infinity,
-
-            ease: "linear",
-          }}
-          className="
-            absolute
-            -right-20
-            top-10
-            h-72
-            w-72
-            rounded-full
-            bg-cyan-400/20
-            blur-[100px]
-          "
-        />
-
-        <div
-          className="
-            absolute
-            inset-0
-            bg-linear-to-br
-            from-white/[0.08]
-            via-transparent
-            to-black/20
-          "
-        />
-      </div>
-
       {/* Content */}
 
       <div
@@ -298,10 +225,8 @@ export default function PaymentCard({
                 overflow-hidden
                 rounded-2xl
                 border
-                border-white/20
-                bg-linear-to-br
-                from-white/20
-                to-white/[0.05]
+                border-sky-100
+bg-sky-50
               "
             >
               {student.profilePhoto ? (
@@ -324,7 +249,7 @@ export default function PaymentCard({
                     justify-center
                     text-sm
                     font-semibold
-                    text-white/80
+                    text-slate-900/80
                   "
                 >
                   {getInitials(student.firstName, student.lastName)}
@@ -344,7 +269,7 @@ export default function PaymentCard({
                   truncate
                   text-base
                   font-semibold
-                  text-white
+                  text-slate-900
                 "
               >
                 {student.firstName} {student.lastName}
@@ -354,7 +279,7 @@ export default function PaymentCard({
                 className="
                   mt-1
                   text-xs
-                  text-white/50
+                  text-slate-500
                 "
               >
                 {student.studentClass}
@@ -401,10 +326,13 @@ export default function PaymentCard({
             items-end
             justify-between
             gap-4
-            rounded-2xl
-            border
-            border-white/10
-            bg-black/10
+            rounded-3xl
+border
+border-emerald-100
+bg-linear-to-br
+from-emerald-50
+via-white
+to-teal-50
             p-4
           "
         >
@@ -414,7 +342,7 @@ export default function PaymentCard({
                 text-xs
                 uppercase
                 tracking-[0.18em]
-                text-white/40
+                text-slate-500
               "
             >
               Monthly Fee
@@ -431,7 +359,7 @@ export default function PaymentCard({
               <IndianRupee
                 size={22}
                 className="
-                  text-white/70
+                  text-emerald-600
                 "
               />
 
@@ -440,7 +368,7 @@ export default function PaymentCard({
                   text-3xl
                   font-semibold
                   tracking-tight
-                  text-white
+                  text-slate-900
                 "
               >
                 {monthlyFee.toLocaleString("en-IN")}
@@ -460,7 +388,7 @@ export default function PaymentCard({
                 justify-end
                 gap-2
                 text-sm
-                text-white/70
+                text-slate-900/70
               "
             >
               <CalendarDays size={15} />
@@ -472,7 +400,7 @@ export default function PaymentCard({
               className="
                 mt-2
                 text-xs
-                text-white/40
+                text-slate-500
               "
             >
               Current cycle
@@ -482,64 +410,171 @@ export default function PaymentCard({
         {/* ======================================================
             Payment Timeline
         ======================================================= */}
-        <motion.div
+        <motion.section
           variants={itemVariants}
           className="
-            mt-6
-            rounded-2xl
-            border
-            border-white/10
-            bg-white/[0.02]
-            p-4
-          "
+    mt-6
+    overflow-hidden
+    rounded-3xl
+    border
+    border-slate-200
+    bg-white
+    shadow-sm
+  "
         >
+          {/* Header */}
+
           <div
             className="
-              mb-4
-              flex
-              items-center
-              justify-between
-            "
+      flex
+      items-center
+      justify-between
+      border-b
+      border-slate-100
+      bg-linear-to-r
+      from-violet-50
+      via-white
+      to-fuchsia-50
+      px-5
+      py-4
+    "
           >
-            <div
-              className="
-                flex
-                items-center
-                gap-2
-              "
-            >
-              <Sparkles
-                size={16}
+            <div className="flex items-center gap-3">
+              <div
                 className="
-                  text-white/60
-                "
-              />
-
-              <span
-                className="
-                  text-sm
-                  font-medium
-                  text-white/80
-                "
+          flex
+          h-11
+          w-11
+          items-center
+          justify-center
+          rounded-2xl
+          bg-linear-to-br
+          from-violet-600
+          to-fuchsia-600
+          text-white
+          shadow-lg
+        "
               >
-                Payment Journey
-              </span>
+                <Sparkles size={18} />
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold text-slate-900">
+                  Payment Journey
+                </h4>
+
+                <p className="text-xs text-slate-500">
+                  Complete payment history & monthly progress
+                </p>
+              </div>
             </div>
 
-            <span
+            <div
               className="
-                text-xs
-                text-white/40
-              "
+        rounded-full
+        border
+        border-violet-200
+        bg-violet-50
+        px-3
+        py-1
+        text-xs
+        font-semibold
+        text-violet-700
+      "
             >
               {student.months.length} Months
-            </span>
+            </div>
           </div>
 
-          <LayoutGroup>
-            <MonthTimeline months={student.months} />
-          </LayoutGroup>
-        </motion.div>{" "}
+          {/* Timeline */}
+
+          <div className="relative">
+            {/* subtle fade */}
+
+            <div
+              className="
+        pointer-events-none
+        absolute
+        left-0
+        top-0
+        z-10
+        h-full
+        w-8
+        bg-linear-to-r
+        from-white
+        to-transparent
+      "
+            />
+
+            <div
+              className="
+        pointer-events-none
+        absolute
+        right-0
+        top-0
+        z-10
+        h-full
+        w-8
+        bg-linear-to-l
+        from-white
+        to-transparent
+      "
+            />
+
+            <div
+              className="
+        overflow-x-auto
+        px-5
+        py-5
+
+        scrollbar-thin
+        scrollbar-track-transparent
+        scrollbar-thumb-slate-300
+        hover:scrollbar-thumb-slate-400
+      "
+            >
+              <LayoutGroup>
+                <MonthTimeline months={student.months} />
+              </LayoutGroup>
+            </div>
+          </div>
+
+          {/* Footer */}
+
+          <div
+            className="
+      flex
+      items-center
+      justify-between
+      border-t
+      border-slate-100
+      bg-slate-50/70
+      px-5
+      py-3
+      text-xs
+      text-slate-500
+    "
+          >
+            <span>Scroll horizontally to explore all months</span>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                Paid
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+                Pending
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+                Partial
+              </div>
+            </div>
+          </div>
+        </motion.section>
         {/* ======================================================
             Quick Stats
         ======================================================= */}
@@ -562,6 +597,7 @@ export default function PaymentCard({
                   })
                 : "-"
             }
+            variant="paid"
           />
 
           <StatBox
@@ -571,9 +607,10 @@ export default function PaymentCard({
                 ? `${nextPendingMonth.month}/${nextPendingMonth.year}`
                 : "-"
             }
+            variant="due"
           />
 
-          <StatBox label="Status" value={feeStatus} />
+          <StatBox label="Status" value={feeStatus} variant="status" />
         </motion.div>
         {/* ======================================================
             Actions
@@ -587,75 +624,171 @@ export default function PaymentCard({
             gap-3
           "
         >
-          {/* History Button */}
+          <div className="mt-7 flex gap-3">
+            {/* History */}
 
-          <button
-            type="button"
-            onClick={() => onViewHistory?.(student)}
-            className="
-              group
-              flex
-              flex-1
-              items-center
-              justify-center
-              gap-2
-              rounded-2xl
-              border
-              border-white/10
-              bg-white/[0.04]
-              px-4
-              py-3
-              text-sm
-              font-medium
-              text-white/80
-              transition
-              hover:bg-white/[0.08]
-              active:scale-95
-            "
-          >
-            <History
-              size={16}
+            <motion.button
+              whileHover={{
+                y: -2,
+                scale: 1.02,
+              }}
+              whileTap={{
+                scale: 0.97,
+              }}
+              type="button"
+              onClick={() => onViewHistory?.(student)}
               className="
-                transition
-                group-hover:scale-110
-              "
-            />
-            History
-          </button>
+      group
+      relative
+      flex
+      flex-1
+      cursor-pointer
+      items-center
+      justify-center
+      overflow-hidden
+      rounded-2xl
+      border
+      border-slate-200
+      bg-linear-to-br
+      from-white
+      via-slate-50
+      to-slate-100
+      px-5
+      py-3.5
+      shadow-md
+      transition-all
+      duration-300
+      hover:border-slate-300
+      hover:shadow-xl
+      active:shadow-md
+    "
+            >
+              <span
+                className="
+        absolute
+        inset-0
+        bg-linear-to-r
+        from-transparent
+        via-white/60
+        to-transparent
+        -translate-x-full
+        group-hover:translate-x-full
+        transition-transform
+        duration-1000
+      "
+              />
 
-          {/* Record Payment Button */}
+              <History
+                size={18}
+                className="
+        mr-2
+        text-slate-600
+        transition-all
+        duration-300
+        group-hover:-rotate-12
+        group-hover:scale-110
+      "
+              />
 
-          <button
-            type="button"
-            onClick={() => onRecordPayment?.(student)}
-            className="
-              group
-              flex
-              flex-1
-              items-center
-              justify-center
-              gap-2
-              rounded-2xl
-              bg-white
-              px-4
-              py-3
-              text-sm
-              font-semibold
-              text-black
-              transition
-              hover:scale-[1.02]
-              active:scale-95
-            "
-          >
-            <ReceiptIndianRupee
-              size={17}
+              <span
+                className="
+        relative
+        font-semibold
+        text-slate-700
+      "
+              >
+                History
+              </span>
+            </motion.button>
+
+            {/* Record Payment */}
+
+            <motion.button
+              whileHover={{
+                y: -2,
+                scale: 1.02,
+              }}
+              whileTap={{
+                scale: 0.97,
+              }}
+              type="button"
+              onClick={() => onRecordPayment?.(student)}
               className="
-                transition
-                group-hover:rotate-6
-              "
-            />
-            Record Payment
-          </button>
+      group
+      relative
+      flex
+      flex-1
+      cursor-pointer
+      items-center
+      justify-center
+      overflow-hidden
+      rounded-2xl
+      bg-linear-to-r
+      from-violet-600
+      via-fuchsia-600
+      to-indigo-600
+      px-5
+      py-3.5
+      shadow-[0_15px_40px_rgba(124,58,237,0.35)]
+      transition-all
+      duration-300
+      hover:shadow-[0_20px_55px_rgba(124,58,237,0.55)]
+    "
+            >
+              {/* Glow */}
+
+              <span
+                className="
+        absolute
+        inset-0
+        opacity-0
+        bg-linear-to-r
+        from-white/0
+        via-white/25
+        to-white/0
+        -translate-x-full
+        group-hover:translate-x-full
+        group-hover:opacity-100
+        transition-all
+        duration-1000
+      "
+              />
+
+              <div
+                className="
+        absolute
+        inset-0
+        rounded-2xl
+        ring-1
+        ring-white/20
+      "
+              />
+
+              <ReceiptIndianRupee
+                size={18}
+                className="
+        relative
+        mr-2
+        text-white
+        transition-all
+        duration-300
+        group-hover:rotate-12
+        group-hover:scale-110
+      "
+              />
+
+              <span
+                className="
+        relative
+        font-semibold
+        tracking-wide
+        text-white
+      "
+              >
+                Record Payment
+              </span>
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     </motion.div>
@@ -666,45 +799,66 @@ export default function PaymentCard({
    Stat Box
 ====================================================== */
 
-function StatBox({
-  label,
-
-  value,
-}: {
+interface StatBoxProps {
   label: string;
-
   value: string;
-}) {
+  variant?: "paid" | "due" | "status";
+}
+
+function StatBox({ label, value, variant = "paid" }: StatBoxProps) {
+  const styles = {
+    paid: {
+      icon: CheckCircle2,
+      border: "border-emerald-200",
+      bg: "bg-gradient-to-br from-emerald-50 to-white",
+      iconBg: "bg-emerald-100 text-emerald-600",
+      value: "text-emerald-700",
+    },
+
+    due: {
+      icon: CalendarClock,
+      border: "border-blue-200",
+      bg: "bg-gradient-to-br from-sky-50 to-white",
+      iconBg: "bg-sky-100 text-sky-600",
+      value: "text-sky-700",
+    },
+
+    status: {
+      icon: Clock3,
+      border: "border-violet-200",
+      bg: "bg-gradient-to-br from-violet-50 to-white",
+      iconBg: "bg-violet-100 text-violet-600",
+      value: "text-violet-700",
+    },
+  };
+
+  const config = styles[variant];
+  const Icon = config.icon;
+
   return (
     <div
-      className="
-        rounded-2xl
-        border
-        border-white/10
-        bg-white/[0.03]
-        p-3
-      "
+      className={cn(
+        "rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
+        config.border,
+        config.bg,
+      )}
     >
-      <p
-        className="
-          text-[11px]
-          uppercase
-          tracking-wider
-          text-white/40
-        "
-      >
-        {label}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-500">
+          {label}
+        </p>
 
-      <p
-        className="
-          mt-1
-          truncate
-          text-sm
-          font-medium
-          text-white
-        "
-      >
+        <div
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-xl",
+            config.iconBg,
+          )}
+        >
+          <Icon size={18} />
+        </div>
+      </div>
+
+      <p className={cn("mt-4 text-lg font-bold tracking-tight", config.value)}>
         {value}
       </p>
     </div>

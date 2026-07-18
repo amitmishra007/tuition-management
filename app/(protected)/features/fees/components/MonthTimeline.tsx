@@ -1,317 +1,233 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Check, Clock3, AlertCircle } from "lucide-react";
-
+import { format, isSameMonth } from "date-fns";
 import type { FeeMonth } from "../types/fee";
+import TimelineCard from "./TimelineCard";
+import TimelineConnector from "./TimelineConnector";
+import { motion, type Variants } from "framer-motion";
 
-interface Props {
-  months: FeeMonth[];
+const container: Variants = {
+  hidden: {},
 
-  onSelect?: (month: FeeMonth) => void;
-}
-
-/* =====================================================
-   Month Labels
-===================================================== */
-
-const MONTH_LABELS = [
-  "J",
-  "F",
-  "M",
-  "A",
-  "M",
-  "J",
-  "J",
-  "A",
-  "S",
-  "O",
-  "N",
-  "D",
-];
-
-/* =====================================================
-   Styles
-===================================================== */
-
-const STATUS = {
-  paid: {
-    label: "Paid",
-
-    node: "bg-emerald-400 text-white shadow-emerald-400/40",
-
-    ring: "ring-emerald-300/30",
-
-    line: "bg-emerald-400",
-  },
-
-  pending: {
-    label: "Pending",
-
-    node: "bg-amber-400 text-white shadow-amber-400/40",
-
-    ring: "ring-amber-300/30",
-
-    line: "bg-amber-300/40",
-  },
-
-  partial: {
-    label: "Partial",
-
-    node: "bg-blue-400 text-white shadow-blue-400/40",
-
-    ring: "ring-blue-300/30",
-
-    line: "bg-blue-300/40",
-  },
-
-  na: {
-    label: "Not paid",
-
-    node: "bg-slate-300 text-white shadow-slate-300/30",
-
-    ring: "ring-slate-300/20",
-
-    line: "bg-slate-200",
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.1,
+    },
   },
 };
 
-export default function MonthTimeline({ months, onSelect }: Props) {
-  return (
-    <div
-      className="
-        relative
-        w-full
-        overflow-x-auto
-        pb-3
-        scrollbar-hide
-      "
-    >
+const item: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+    scale: 0.95,
+  },
+
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+
+    transition: {
+      type: "spring" as const,
+      stiffness: 260,
+      damping: 20,
+    },
+  },
+};
+
+interface Props {
+  months: FeeMonth[];
+}
+
+export default function MonthTimeline({ months }: Props) {
+  const today = new Date();
+
+  if (!months.length) {
+    return (
       <div
         className="
-          relative
           flex
-          min-w-max
-          items-start
-          gap-6
-          px-2
-          pt-2
+          h-48
+          items-center
+          justify-center
+          rounded-3xl
+          border
+          border-dashed
+          border-slate-200
+          bg-linear-to-br
+          from-slate-50
+          via-white
+          to-slate-50
         "
       >
-        {/* Connection Line */}
+        <div className="text-center">
+          <p className="text-lg font-semibold text-slate-700">
+            No payment history
+          </p>
 
-        <div
-          className="
-            absolute
-            top-11
-            left-8
-            right-8
-            h-0.5
-            bg-white/10
-          "
-        />
+          <p className="mt-1 text-sm text-slate-500">
+            Timeline will appear once fee records exist.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="visible"
+      className="relative"
+    >
+      {/* left fade */}
+
+      <div
+        className="
+          pointer-events-none
+          absolute
+          left-0
+          top-0
+          z-20
+          h-full
+          w-10
+          bg-linear-to-r
+          from-white
+          via-white/90
+          to-transparent
+        "
+      />
+
+      {/* right fade */}
+
+      <div
+        className="
+          pointer-events-none
+          absolute
+          right-0
+          top-0
+          z-20
+          h-full
+          w-10
+          bg-linear-to-l
+          from-white
+          via-white/90
+          to-transparent
+        "
+      />
+
+      <motion.div
+        layout
+        className="
+          timeline-scroll
+          relative
+          flex
+          snap-x
+          snap-mandatory
+          items-start
+          gap-5
+          overflow-x-auto
+          px-3
+          py-4
+          scroll-smooth
+        "
+      >
         {months.map((month, index) => {
-          const style = STATUS[month.status];
+          const date = new Date(month.year, month.month - 1);
+
+          const isCurrent = isSameMonth(today, date);
+
+          const isLast = index === months.length - 1;
 
           return (
-            <motion.button
-              key={`${month.year}-${month.month}`}
-              initial={{
-                opacity: 0,
-                y: 12,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: index * 0.05,
-              }}
-              whileHover={{
-                y: -5,
-              }}
-              whileTap={{
-                scale: 0.95,
-              }}
-              onClick={() => onSelect?.(month)}
+            <motion.div
+              key={`${month.month}-${month.year}`}
+              variants={item}
+              layout
               className="
-                group
-                relative
                 flex
-                w-12
-                flex-col
+                shrink-0
+                snap-start
                 items-center
+                gap-4
               "
             >
-              <span
-                className="
-                  mb-3
-                  text-xs
-                  font-semibold
-                  text-white/50
-                "
-              >
-                {MONTH_LABELS[month.month - 1]}
-              </span>
+              <TimelineCard month={month} isCurrent={isCurrent} />
 
-              <div
-                className="
-                  relative
-                  flex
-                  h-10
-                  w-10
-                  items-center
-                  justify-center
-                "
-              >
-                <motion.div
-                  animate={
-                    month.status === "pending"
-                      ? {
-                          scale: [1, 1.15, 1],
-                        }
-                      : {}
-                  }
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
-                  className={`
-                    absolute
-                    inset-0
-                    rounded-full
-                    ring-8
-                    ${style.ring}
-                  `}
-                />{" "}
-                <motion.div
-                  layoutId={`node-${month.year}-${month.month}`}
-                  className={`
-                    relative
-                    z-10
-                    flex
-                    h-10
-                    w-10
-                    items-center
-                    justify-center
-                    rounded-full
-                    shadow-lg
-                    ${style.node}
-                  `}
-                >
-                  {month.status === "paid" && (
-                    <Check size={16} strokeWidth={3} />
-                  )}
-
-                  {month.status === "pending" && <Clock3 size={16} />}
-
-                  {month.status === "partial" && <AlertCircle size={16} />}
-                </motion.div>
-              </div>
-
-              {/* Month Card */}
-
-              <div
-                className="
-                  mt-3
-                  text-center
-                "
-              >
-                <p
-                  className="
-                    text-[10px]
-                    text-white/40
-                  "
-                >
-                  {month.month.toString().padStart(2, "0")}/{month.year}
-                </p>
-              </div>
-
-              {/* Tooltip */}
-
-              <div
-                className="
-                  pointer-events-none
-                  absolute
-                  bottom-full
-                  left-1/2
-                  mb-4
-                  -translate-x-1/2
-                  opacity-0
-                  transition-all
-                  duration-300
-                  group-hover:opacity-100
-                  z-50
-                "
-              >
-                <div
-                  className="
-                    min-w-32.5
-                    rounded-2xl
-                    border
-                    border-white/10
-                    bg-slate-950/95
-                    px-4
-                    py-3
-                    text-center
-                    shadow-2xl
-                    backdrop-blur-xl
-                  "
-                >
-                  <p
-                    className="
-                      text-xs
-                      font-semibold
-                      text-white
-                    "
-                  >
-                    {new Date(month.year, month.month - 1).toLocaleString(
-                      "default",
-                      {
-                        month: "long",
-                      },
-                    )}
-                  </p>
-
-                  <p
-                    className="
-                      mt-1
-                      text-[11px]
-                      text-white/50
-                    "
-                  >
-                    {style.label}
-                  </p>
-
-                  <p
-                    className="
-                      mt-2
-                      text-sm
-                      font-bold
-                      text-white
-                    "
-                  >
-                    ₹{month.amount.toLocaleString("en-IN")}
-                  </p>
-
-                  {month.paidAmount > 0 && (
-                    <p
-                      className="
-                        mt-1
-                        text-[10px]
-                        text-emerald-300
-                      "
-                    >
-                      Paid ₹{month.paidAmount.toLocaleString("en-IN")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </motion.button>
+              {!isLast && <TimelineConnector paid={month.status === "paid"} />}
+            </motion.div>
           );
         })}
+      </motion.div>
+
+      {/* Footer */}
+
+      <div
+        className="
+          mt-5
+          flex
+          items-center
+          justify-between
+          rounded-2xl
+          border
+          border-slate-200
+          bg-linear-to-r
+          from-slate-50
+          via-white
+          to-slate-50
+          px-5
+          py-3
+        "
+      >
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Timeline
+          </p>
+
+          <p className="text-sm text-slate-600">
+            Showing payment history from{" "}
+            <span className="font-semibold text-slate-900">
+              {format(
+                new Date(months[0].year, months[0].month - 1),
+                "MMM yyyy",
+              )}
+            </span>{" "}
+            to{" "}
+            <span className="font-semibold text-slate-900">
+              {format(
+                new Date(
+                  months[months.length - 1].year,
+                  months[months.length - 1].month - 1,
+                ),
+                "MMM yyyy",
+              )}
+            </span>
+          </p>
+        </div>
+
+        <div className="hidden items-center gap-5 md:flex">
+          <Legend color="from-emerald-500 to-green-500" label="Paid" />
+          <Legend color="from-sky-500 to-indigo-500" label="Partial" />
+          <Legend color="from-amber-500 to-orange-500" label="Pending" />
+        </div>
       </div>
+    </motion.div>
+  );
+}
+
+interface LegendProps {
+  label: string;
+  color: string;
+}
+
+function Legend({ label, color }: LegendProps) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`h-3 w-3 rounded-full bg-linear-to-r ${color}`} />
+
+      <span className="text-xs font-medium text-slate-600">{label}</span>
     </div>
   );
 }

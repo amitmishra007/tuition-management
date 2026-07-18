@@ -136,6 +136,58 @@ export type Database = {
           created_at: string | null;
         };
       };
+      student_fee_records: {
+        Row: {
+          id: string;
+          student_id: string;
+
+          billing_month: string;
+
+          amount: number;
+          paid_amount: number;
+
+          status: "Paid" | "Pending" | "Partial";
+
+          paid_on: string | null;
+
+          created_at: string | null;
+          updated_at: string | null;
+        };
+
+        Insert: {
+          id?: string;
+
+          student_id: string;
+
+          billing_month: string;
+
+          amount: number;
+          paid_amount?: number;
+
+          status?: "Paid" | "Pending" | "Partial";
+
+          paid_on?: string | null;
+
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+
+        Update: {
+          student_id?: string;
+
+          billing_month?: string;
+
+          amount?: number;
+          paid_amount?: number;
+
+          status?: "Paid" | "Pending" | "Partial";
+
+          paid_on?: string | null;
+
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
     };
   };
 };

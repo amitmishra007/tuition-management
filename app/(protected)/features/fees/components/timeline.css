@@ -1,0 +1,29 @@
+.timeline-scroll {
+  scrollbar-width: thin;
+
+  scrollbar-color: rgba(139, 92, 246, 0.45) transparent;
+}
+
+/* Chrome */
+
+.timeline-scroll::-webkit-scrollbar {
+  height: 3px;
+}
+
+.timeline-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #7c3aed, #0891b2);
+}
+
+.timeline-scroll {
+  scroll-behavior: smooth;
+}
