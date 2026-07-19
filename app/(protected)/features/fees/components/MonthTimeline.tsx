@@ -1,18 +1,15 @@
 "use client";
 
-import { format, isSameMonth } from "date-fns";
-import type { FeeMonth } from "../types/fee";
-import TimelineCard from "./TimelineCard";
-import TimelineConnector from "./TimelineConnector";
 import { motion, type Variants } from "framer-motion";
+import { Check, IndianRupee, Minus } from "lucide-react";
+import type { ReactNode } from "react";
+import type { FeeMonth } from "../types/fee";
 
 const container: Variants = {
   hidden: {},
-
   visible: {
     transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
+      staggerChildren: 0.035,
     },
   },
 };
@@ -20,19 +17,17 @@ const container: Variants = {
 const item: Variants = {
   hidden: {
     opacity: 0,
-    y: 18,
-    scale: 0.95,
+    scale: 0.85,
+    y: 10,
   },
-
   visible: {
     opacity: 1,
-    y: 0,
     scale: 1,
-
+    y: 0,
     transition: {
-      type: "spring" as const,
-      stiffness: 260,
-      damping: 20,
+      type: "spring",
+      stiffness: 320,
+      damping: 24,
     },
   },
 };
@@ -41,193 +36,153 @@ interface Props {
   months: FeeMonth[];
 }
 
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 export default function MonthTimeline({ months }: Props) {
-  const today = new Date();
+  const current = new Date();
 
-  if (!months.length) {
-    return (
-      <div
-        className="
-          flex
-          h-48
-          items-center
-          justify-center
-          rounded-3xl
-          border
-          border-dashed
-          border-slate-200
-          bg-linear-to-br
-          from-slate-50
-          via-white
-          to-slate-50
-        "
-      >
-        <div className="text-center">
-          <p className="text-lg font-semibold text-slate-700">
-            No payment history
-          </p>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Timeline will appear once fee records exist.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const currentYear = current.getFullYear();
 
   return (
     <motion.div
       variants={container}
       initial="hidden"
       animate="visible"
-      className="relative"
+      className="space-y-5"
     >
-      {/* left fade */}
+      <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+        {MONTHS.map((label, index) => {
+          const monthNo = index + 1;
 
-      <div
-        className="
-          pointer-events-none
-          absolute
-          left-0
-          top-0
-          z-20
-          h-full
-          w-10
-          bg-linear-to-r
-          from-white
-          via-white/90
-          to-transparent
-        "
-      />
+          const fee = months.find(
+            (m) => m.month === monthNo && m.year === currentYear,
+          );
 
-      {/* right fade */}
+          let variant: "paid" | "pending" | "future" | "na" = "na";
 
-      <div
-        className="
-          pointer-events-none
-          absolute
-          right-0
-          top-0
-          z-20
-          h-full
-          w-10
-          bg-linear-to-l
-          from-white
-          via-white/90
-          to-transparent
-        "
-      />
-
-      <motion.div
-        layout
-        className="
-          timeline-scroll
-          relative
-          flex
-          snap-x
-          snap-mandatory
-          items-start
-          gap-5
-          overflow-x-auto
-          px-3
-          py-4
-          scroll-smooth
-        "
-      >
-        {months.map((month, index) => {
-          const date = new Date(month.year, month.month - 1);
-
-          const isCurrent = isSameMonth(today, date);
-
-          const isLast = index === months.length - 1;
+          if (fee) {
+            if (fee.status === "paid") {
+              variant = "paid";
+            } else {
+              variant = "pending";
+            }
+          } else {
+            if (monthNo > current.getMonth() + 1) {
+              variant = "future";
+            }
+          }
 
           return (
             <motion.div
-              key={`${month.month}-${month.year}`}
+              key={label}
               variants={item}
-              layout
-              className="
-                flex
-                shrink-0
-                snap-start
-                items-center
-                gap-4
-              "
+              whileHover={{
+                y: -4,
+                scale: 1.05,
+              }}
+              className="group"
             >
-              <TimelineCard month={month} isCurrent={isCurrent} />
-
-              {!isLast && <TimelineConnector paid={month.status === "paid"} />}
+              <MonthBubble label={label} variant={variant} />
             </motion.div>
           );
         })}
-      </motion.div>
-
-      {/* Footer */}
-
-      <div
-        className="
-          mt-5
-          flex
-          items-center
-          justify-between
-          rounded-2xl
-          border
-          border-slate-200
-          bg-linear-to-r
-          from-slate-50
-          via-white
-          to-slate-50
-          px-5
-          py-3
-        "
-      >
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Timeline
-          </p>
-
-          <p className="text-sm text-slate-600">
-            Showing payment history from{" "}
-            <span className="font-semibold text-slate-900">
-              {format(
-                new Date(months[0].year, months[0].month - 1),
-                "MMM yyyy",
-              )}
-            </span>{" "}
-            to{" "}
-            <span className="font-semibold text-slate-900">
-              {format(
-                new Date(
-                  months[months.length - 1].year,
-                  months[months.length - 1].month - 1,
-                ),
-                "MMM yyyy",
-              )}
-            </span>
-          </p>
-        </div>
-
-        <div className="hidden items-center gap-5 md:flex">
-          <Legend color="from-emerald-500 to-green-500" label="Paid" />
-          <Legend color="from-sky-500 to-indigo-500" label="Partial" />
-          <Legend color="from-amber-500 to-orange-500" label="Pending" />
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+          <Legend variant="paid" label="Paid" />
+          <Legend variant="pending" label="Pending" />
+          <Legend variant="future" label="Upcoming" />
+          <Legend variant="na" label="N/A" />
         </div>
       </div>
     </motion.div>
   );
 }
 
-interface LegendProps {
+type Variant = "paid" | "pending" | "future" | "na";
+
+interface MonthBubbleProps {
   label: string;
-  color: string;
+  variant: Variant;
 }
 
-function Legend({ label, color }: LegendProps) {
+function MonthBubble({ label, variant }: MonthBubbleProps) {
+  type BubbleStyle = {
+    outer: string;
+    inner: string;
+    icon: ReactNode;
+  };
+
+  const styles = {
+    paid: {
+      outer: "border-emerald-200 bg-emerald-50 shadow-emerald-200/60",
+      inner: "bg-gradient-to-br from-emerald-500 to-green-500 text-white",
+      icon: <Check size={14} />,
+    },
+    pending: {
+      outer: "border-rose-200 bg-rose-50 shadow-rose-200/60",
+      inner: "bg-gradient-to-br from-rose-500 to-red-500 text-white",
+      icon: <IndianRupee size={14} />,
+    },
+    future: {
+      outer: "border-amber-200 bg-amber-50 shadow-amber-200/60",
+      inner: "bg-gradient-to-br from-amber-400 to-orange-400 text-white",
+      icon: <IndianRupee size={14} />,
+    },
+    na: {
+      outer: "border-slate-200 bg-slate-50 opacity-50",
+      inner: "bg-slate-200 text-slate-500",
+      icon: <Minus size={14} />,
+    },
+  } satisfies Record<Variant, BubbleStyle>;
+
+  const style = styles[variant];
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div
+        className={`flex h-16 w-16 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 shadow-lg group-hover:shadow-xl ${style.outer}`}
+      >
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-full ${style.inner}`}
+        >
+          {style.icon}
+        </div>
+      </div>
+
+      <span className="text-xs font-semibold text-slate-600">{label}</span>
+    </div>
+  );
+}
+
+interface LegendProps {
+  label: string;
+  variant: Variant;
+}
+
+function Legend({ label, variant }: LegendProps) {
+  const colors = {
+    paid: "bg-emerald-500",
+    pending: "bg-rose-500",
+    future: "bg-amber-500",
+    na: "bg-slate-300",
+  };
+
   return (
     <div className="flex items-center gap-2">
-      <div className={`h-3 w-3 rounded-full bg-linear-to-r ${color}`} />
-
-      <span className="text-xs font-medium text-slate-600">{label}</span>
+      <span className={`h-2.5 w-2.5 rounded-full ${colors[variant]}`} />
+      <span className="text-slate-500">{label}</span>
     </div>
   );
 }
